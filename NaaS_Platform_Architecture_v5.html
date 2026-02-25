@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notary-as-a-Service — Platform Architecture</title>
+<style>
+
+/* ── RESET & BASE ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+@import url('https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@300;400;700&display=swap');
+
+body {
+  font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
+  font-weight: 300;
+  font-size: 10.5pt;
+  line-height: 1.75;
+  color: #1a1a1a;
+  background: #ffffff;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 80px 60px;
+}
+
+/* ── TYPOGRAPHY ───────────────────────────────────────────────────────────── */
+h1 {
+  font-size: 22pt;
+  font-weight: 700;
+  color: #000;
+  letter-spacing: -0.5px;
+  margin: 72px 0 12px 0;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #000;
+  page-break-after: avoid;
+}
+h1.first { margin-top: 0; }
+
+h2 {
+  font-size: 13pt;
+  font-weight: 700;
+  color: #000;
+  margin: 48px 0 8px 0;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: #000;
+  margin: 32px 0 6px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  page-break-after: avoid;
+}
+
+h4 {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #555;
+  margin: 24px 0 4px 0;
+  page-break-after: avoid;
+}
+
+p {
+  margin: 0 0 14px 0;
+  font-weight: 300;
+}
+
+strong { font-weight: 700; }
+em { font-style: italic; font-weight: 300; }
+
+a { color: #000; text-decoration: underline; }
+
+/* ── LISTS ────────────────────────────────────────────────────────────────── */
+ul, ol {
+  margin: 4px 0 16px 0;
+  padding-left: 20px;
+}
+li {
+  margin: 5px 0;
+  font-weight: 300;
+  line-height: 1.65;
+}
+li strong { font-weight: 700; }
+
+/* ── COVER PAGE ───────────────────────────────────────────────────────────── */
+.cover {
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-bottom: 2px solid #000;
+  margin-bottom: 0;
+  padding-bottom: 80px;
+}
+.cover-eyebrow {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 28px;
+}
+.cover-title {
+  font-size: 42pt;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  margin-bottom: 6px;
+}
+.cover-subtitle {
+  font-size: 13pt;
+  font-weight: 300;
+  color: #555;
+  margin-bottom: 60px;
+}
+.cover-principle {
+  border-left: 3px solid #000;
+  padding: 16px 24px;
+  margin-bottom: 60px;
+  max-width: 560px;
+}
+.cover-principle .label {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 6px;
+}
+.cover-principle .text {
+  font-size: 16pt;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+.cover-principle .sub {
+  font-size: 9.5pt;
+  font-weight: 300;
+  color: #555;
+}
+.cover-meta {
+  display: flex;
+  gap: 48px;
+}
+.cover-meta-item .label {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 4px;
+}
+.cover-meta-item .value {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #000;
+}
+
+/* ── EXEC SUMMARY ─────────────────────────────────────────────────────────── */
+.exec-summary {
+  padding: 80px 0;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 0;
+}
+.exec-eyebrow {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 20px;
+}
+.exec-headline {
+  font-size: 26pt;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.15;
+  letter-spacing: -0.8px;
+  margin-bottom: 40px;
+  max-width: 600px;
+}
+.exec-lead {
+  font-size: 12pt;
+  font-weight: 300;
+  line-height: 1.7;
+  color: #222;
+  max-width: 640px;
+  margin-bottom: 48px;
+}
+
+/* Summary section headers */
+.sum-head {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #999;
+  margin: 48px 0 16px 0;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Journey steps */
+.journey {
+  counter-reset: step;
+  margin: 0 0 16px 0;
+}
+.journey-step {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 2px;
+  align-items: stretch;
+}
+.journey-step .num {
+  font-size: 9pt;
+  font-weight: 700;
+  color: #fff;
+  background: #000;
+  min-width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.journey-step .content {
+  padding: 4px 0 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  flex: 1;
+}
+.journey-step .content strong {
+  display: inline;
+  margin-bottom: 2px;
+  font-size: 10.5pt;
+}
+.journey-step .content span:not(.tag-auto) {
+  font-size: 9.5pt;
+  color: #555;
+  font-weight: 300;
+}
+.journey-step.auto .num { background: #000; }
+.tag-auto {
+  display: inline-block;
+  font-size: 7pt;
+  font-weight: 700;
+  letter-spacing: 0px;
+  text-transform: none;
+  color: #fff;
+  background: #333;
+  padding: 2px 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+/* Status lifecycle */
+.lifecycle {
+  display: flex;
+  gap: 0;
+  margin: 20px 0 28px 0;
+}
+.lc-step {
+  flex: 1;
+  text-align: center;
+  padding: 16px 8px;
+  background: #f5f5f5;
+  border-right: 2px solid #fff;
+  position: relative;
+}
+.lc-step:last-child { border-right: none; }
+.lc-step.active { background: #000; }
+.lc-step .lc-num {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #999;
+  display: block;
+  margin-bottom: 4px;
+}
+.lc-step.active .lc-num { color: #666; }
+.lc-step .lc-name {
+  font-size: 9pt;
+  font-weight: 700;
+  color: #000;
+  display: block;
+}
+.lc-step.active .lc-name { color: #fff; }
+
+/* Tool responsibility grid */
+.tool-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr;
+  gap: 0;
+  margin: 16px 0 28px 0;
+  border: 1px solid #e0e0e0;
+}
+.tool-grid .tg-header {
+  background: #000;
+  color: #fff;
+  padding: 10px 14px;
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.tool-grid .tg-cell {
+  padding: 12px 14px;
+  font-size: 9.5pt;
+  font-weight: 300;
+  border-top: 1px solid #e8e8e8;
+  vertical-align: top;
+}
+.tool-grid .tg-cell.tool-name {
+  font-weight: 700;
+  font-size: 9.5pt;
+  background: #fafafa;
+  border-right: 1px solid #e8e8e8;
+}
+
+/* Stats strip */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin: 20px 0 32px 0;
+}
+.stat-box {
+  background: #f5f5f5;
+  padding: 24px 20px;
+  text-align: center;
+}
+.stat-box .stat-num {
+  font-size: 22pt;
+  font-weight: 700;
+  color: #000;
+  display: block;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.stat-box .stat-label {
+  font-size: 8.5pt;
+  font-weight: 300;
+  color: #666;
+  line-height: 1.4;
+}
+.stats-strip.dark .stat-box { background: #000; }
+.stats-strip.dark .stat-num { color: #fff; }
+.stats-strip.dark .stat-label { color: #888; }
+
+/* Design choices */
+.choice-list { margin: 16px 0 28px 0; }
+.choice {
+  display: flex;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid #ebebeb;
+}
+.choice:first-child { border-top: 1px solid #ebebeb; }
+.choice .c-marker {
+  width: 4px;
+  background: #000;
+  flex-shrink: 0;
+  min-height: 20px;
+}
+.choice .c-content strong {
+  display: block;
+  font-size: 10.5pt;
+  margin-bottom: 3px;
+}
+.choice .c-content span {
+  font-size: 9.5pt;
+  color: #444;
+  font-weight: 300;
+}
+
+/* Limitations table in summary */
+.limit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-bottom: 1px solid #ebebeb;
+  padding: 12px 0;
+}
+.limit-row:first-child { border-top: 1px solid #ebebeb; }
+.limit-row .lim { font-size: 9.5pt; color: #333; font-weight: 300; }
+.limit-row .res { font-size: 9.5pt; color: #555; font-weight: 300; font-style: italic; }
+
+/* Bottom line */
+.bottom-line {
+  margin: 48px 0 0 0;
+  padding: 32px 36px;
+  background: #000;
+  color: #fff;
+}
+.bottom-line p {
+  font-size: 11pt;
+  font-weight: 300;
+  color: #fff;
+  line-height: 1.7;
+  margin: 0;
+}
+.bottom-line p strong { color: #fff; }
+
+/* ── PAGE BREAK ───────────────────────────────────────────────────────────── */
+.pb {
+  page-break-after: always;
+  margin: 64px 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* ── SECTION BODY ─────────────────────────────────────────────────────────── */
+
+/* Callout / note box */
+.callout {
+  border-left: 2px solid #000;
+  padding: 14px 20px;
+  margin: 20px 0 28px 0;
+  background: #fafafa;
+}
+.callout .c-title {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 6px;
+}
+.callout p { font-size: 9.5pt; font-weight: 300; margin: 0; color: #333; }
+.callout p + p { margin-top: 8px; }
+
+.callout.warn { border-left-color: #888; background: #f5f5f5; }
+.callout.upgrade { border-left-color: #555; background: #f8f8f8; }
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 28px 0;
+  font-size: 9.5pt;
+}
+thead tr { background: #000; }
+th {
+  color: #fff;
+  font-weight: 700;
+  font-size: 8pt;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  text-align: left;
+}
+td {
+  padding: 9px 12px;
+  font-weight: 300;
+  vertical-align: top;
+  border-bottom: 1px solid #ebebeb;
+  line-height: 1.55;
+}
+tr:nth-child(even) td { background: #fafafa; }
+tr:nth-child(odd) td { background: #fff; }
+td strong { font-weight: 700; }
+
+/* Flow steps (notary workflow) */
+.flow {
+  margin: 20px 0 28px 0;
+}
+.flow-step {
+  display: flex;
+  gap: 0;
+  margin-bottom: 3px;
+}
+.flow-step .f-num {
+  font-size: 9pt;
+  font-weight: 700;
+  color: #fff;
+  background: #111;
+  min-width: 36px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 13px;
+  flex-shrink: 0;
+}
+.flow-step .f-body {
+  padding: 12px 16px;
+  background: #f7f7f7;
+  flex: 1;
+}
+.flow-step .f-body strong {
+  display: block;
+  font-size: 10pt;
+  margin-bottom: 3px;
+}
+.flow-step .f-body p {
+  font-size: 9.5pt;
+  color: #444;
+  margin: 0;
+  font-weight: 300;
+}
+.flow-step .f-auto {
+  display: inline-block;
+  font-size: 7pt;
+  font-weight: 700;
+  letter-spacing: 0px;
+  text-transform: none;
+  color: #fff;
+  background: #333;
+  padding: 2px 6px;
+  margin-left: 6px;
+  vertical-align: middle;
+  line-height: 1.4;
+}
+
+/* Label-value pairs */
+.lv { margin: 6px 0; font-size: 9.5pt; font-weight: 300; }
+.lv strong { font-weight: 700; }
+
+/* Status badges in section body */
+.status-row {
+  display: flex;
+  gap: 3px;
+  margin: 16px 0 24px 0;
+}
+.s-badge {
+  flex: 1;
+  text-align: center;
+  padding: 12px 6px;
+  background: #f0f0f0;
+}
+.s-badge:nth-child(1) { background: #e0e0e0; }
+.s-badge:nth-child(2) { background: #bbb; }
+.s-badge:nth-child(3) { background: #555; }
+.s-badge:nth-child(4) { background: #111; }
+.s-badge .s-num {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #fff;
+  display: block;
+  margin-bottom: 3px;
+  opacity: 0.7;
+}
+.s-badge .s-name {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+  line-height: 1.3;
+}
+.s-badge .s-desc {
+  font-size: 7.5pt;
+  font-weight: 300;
+  color: rgba(255,255,255,0.75);
+  display: block;
+  margin-top: 2px;
+}
+
+/* Annex header */
+.annex-cover {
+  padding: 60px 0 48px 0;
+  border-bottom: 2px solid #000;
+  margin-bottom: 0;
+}
+.annex-cover .a-eyebrow {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 16px;
+}
+.annex-cover h1 {
+  border: none;
+  margin: 0 0 8px 0;
+  padding: 0;
+  font-size: 32pt;
+}
+.annex-cover p {
+  font-size: 11pt;
+  font-weight: 300;
+  color: #666;
+  margin: 0;
+}
+.annex-note {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  padding: 14px 18px;
+  margin: 20px 0 32px 0;
+  font-size: 9.5pt;
+  font-weight: 300;
+  color: #444;
+  line-height: 1.6;
+}
+
+/* Three-commit box */
+.three-box {
+  border: 1px solid #e0e0e0;
+  margin: 24px 0;
+}
+.three-box-item {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+.three-box-item:last-child { border-bottom: none; }
+.three-box-num {
+  font-size: 22pt;
+  font-weight: 700;
+  color: #e0e0e0;
+  min-width: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #fafafa;
+}
+.three-box-content {
+  padding: 20px 24px;
+}
+.three-box-content strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10.5pt;
+}
+.three-box-content p {
+  font-size: 9.5pt;
+  color: #444;
+  margin: 0;
+  font-weight: 300;
+}
+
+/* Thank-you page steps */
+.ty-steps {
+  counter-reset: ty;
+  margin: 16px 0 24px 0;
+}
+.ty-step {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 3px;
+}
+.ty-step .ty-num {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: #fff;
+  background: #000;
+  min-width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.ty-step .ty-content {
+  padding: 3px 0 14px 0;
+  border-bottom: 1px solid #f2f2f2;
+  flex: 1;
+}
+.ty-step .ty-content strong { display: block; margin-bottom: 2px; }
+.ty-step .ty-content span { font-size: 9.5pt; color: #555; font-weight: 300; }
+.ty-step .ty-content .upgrade-note {
+  margin-top: 6px;
+  font-size: 9pt;
+  color: #777;
+  font-style: italic;
+  border-left: 2px solid #ccc;
+  padding-left: 10px;
+  font-weight: 300;
+}
+
+/* Section divider */
+.sec-rule { border: none; border-top: 1px solid #e0e0e0; margin: 56px 0 0 0; }
+
+/* Print */
+@media print {
+  body { padding: 40px; max-width: 100%; }
+  .pb { page-break-after: always; }
+  .cover { min-height: auto; padding-bottom: 60px; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════ COVER ══ -->
+<div class="cover">
+  <p class="cover-eyebrow">Platform Architecture &mdash; MVP Edition</p>
+  <h1 class="cover-title" style="font-size:42pt;border:none;margin:0 0 6px 0;padding:0;letter-spacing:-1.5px;">Notary-as-a-Service</h1>
+  <p class="cover-subtitle">A digital platform for notary document services</p>
+
+  <div class="cover-principle">
+    <p class="label">Core principle</p>
+    <p class="text">One case. One flow. Two views.</p>
+    <p class="sub">Client-facing: 100% Squarespace &nbsp;&mdash;&nbsp; Operations: Airtable as a back-office tool</p>
+  </div>
+
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <p class="label">Stack</p>
+      <p class="value">Squarespace + Airtable + Zapier<br>Google Drive + Stripe + WhatsApp</p>
+    </div>
+    <div class="cover-meta-item">
+      <p class="label">Monthly cost</p>
+      <p class="value">~&euro;80&ndash;115</p>
+    </div>
+    <div class="cover-meta-item">
+      <p class="label">Build time</p>
+      <p class="value">15 weeks</p>
+    </div>
+  </div>
+</div>
+
+<div class="pb"></div>
+
+<!-- ══════════════════════════════════════════════════ EXEC SUMMARY ══ -->
+<div class="exec-summary">
+
+  <p class="exec-eyebrow">Executive Summary</p>
+  <h2 class="exec-headline" style="font-size:26pt;letter-spacing:-0.8px;margin-bottom:28px;">A digital front door<br>for notary services.</h2>
+
+  <p class="exec-lead">
+    Getting a document notarised is slow, opaque, and unnecessarily hard.
+    This platform fixes that. Clients submit a request, upload their documents,
+    pay a deposit, and choose an appointment window — all online, in minutes.
+    Notaries receive a clean, structured case. Both sides are kept informed automatically.
+    No phone tag. No missed emails. No confusion.
+  </p>
+  <p class="exec-lead" style="margin-bottom:0;">
+    The platform is built on six tools, connected by automation.
+    No custom software. No developers needed to run it.
+    It can be live in 15 weeks at roughly &euro;80&ndash;115 per month.
+  </p>
+
+  <!-- WHO -->
+  <p class="sum-head">Who it serves</p>
+  <table>
+    <colgroup><col style="width:18%"><col style="width:42%"><col style="width:40%"></colgroup>
+    <thead><tr><th></th><th>Who they are</th><th>What they get</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Clients</strong></td><td>Anyone who needs a notarised document &mdash; in Romania or abroad. People who want a clear, simple process instead of phone calls and office visits.</td><td>A guided online flow. Documents submitted once. A private case page to track progress. WhatsApp updates at every step.</td></tr>
+      <tr><td><strong>Notary offices</strong></td><td>Romanian notary offices subscribing to receive and manage cases through the platform (monthly fee: &euro;200&ndash;500).</td><td>Cases arrive structured and complete. Documents already uploaded. Advance deposit already paid. No admin overhead.</td></tr>
+      <tr><td><strong>Platform operator</strong></td><td>The person or team running the platform.</td><td>A low-overhead, automated business. Scales without proportional manual work. Clear upgrade path as volume grows.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- JOURNEY -->
+  <p class="sum-head">The client journey</p>
+  <div class="journey">
+
+    <div class="journey-step">
+      <div class="num">1</div>
+      <div class="content">
+        <strong>Fill in a short form</strong>
+        <span>Name, document type, contact details. Takes two minutes. Submitted on the platform website.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">2</div>
+      <div class="content">
+        <strong>Upload documents</strong>
+        <span>Identity document and any supporting files. Uploaded via a secure link on the same page. No size limit. No Google account needed.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">3</div>
+      <div class="content">
+        <strong>Pay the advance deposit</strong>
+        <span>A fixed fee paid via Stripe. Confirms intent. Prevents no-shows. Deducted from the total on the day of the appointment.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">4</div>
+      <div class="content">
+        <strong>Select a preferred appointment window</strong>
+        <span>Client picks preferred dates and times. The notary confirms the exact slot after reviewing the case.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">5</div>
+      <div class="content">
+        <strong>Case is opened</strong> <span class="tag-auto">Automatic</span><br>
+        <span>Stripe payment triggers Zapier. Zapier creates the Airtable case record, generates a unique access code, creates the Google Drive folder, and sends the client a WhatsApp message — all within seconds. No human involved.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">6</div>
+      <div class="content">
+        <strong>Client receives their case link</strong> <span class="tag-auto">Automatic</span><br>
+        <span>A WhatsApp message arrives with the Case ID and a private link to the client's personal case page. The link works immediately. No account or password needed.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">7</div>
+      <div class="content">
+        <strong>Notary reviews and prepares</strong>
+        <span>The notary opens the case in Airtable. Reviews documents. Prepares the notarial act. Updates the status to In Review &mdash; client receives a WhatsApp update automatically.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">8</div>
+      <div class="content">
+        <strong>Appointment confirmed</strong>
+        <span>Notary confirms the exact date and time within the client's preferred window. Status moves to Booked. Client receives a WhatsApp confirmation.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">9</div>
+      <div class="content">
+        <strong>Case closed</strong> <span class="tag-auto">Automatic</span><br>
+        <span>After the appointment, the notary marks the case Completed. Client receives a WhatsApp message with a download link for their finalised documents.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LIFECYCLE -->
+  <p class="sum-head">Case lifecycle</p>
+  <div class="lifecycle">
+    <div class="lc-step active">
+      <span class="lc-num">01</span>
+      <span class="lc-name">Submitted</span>
+    </div>
+    <div class="lc-step">
+      <span class="lc-num">02</span>
+      <span class="lc-name">In Review</span>
+    </div>
+    <div class="lc-step">
+      <span class="lc-num">03</span>
+      <span class="lc-name">Booked</span>
+    </div>
+    <div class="lc-step">
+      <span class="lc-num">04</span>
+      <span class="lc-name">Completed</span>
+    </div>
+  </div>
+  <p style="font-size:9pt;color:#777;font-weight:300;margin-top:-12px;">"Submitted" is triggered by payment — not by form submission. No case is opened until a deposit is paid.</p>
+
+  <!-- TECHNOLOGY -->
+  <p class="sum-head">The technology</p>
+  <p style="font-size:9.5pt;color:#444;font-weight:300;margin-bottom:16px;">Six tools. Each has a single, clear responsibility. No custom code.</p>
+  <table>
+    <colgroup><col style="width:18%"><col style="width:24%"><col style="width:58%"></colgroup>
+    <thead><tr><th>Tool</th><th>Role</th><th>Why this tool</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Squarespace</strong></td><td>Everything clients see</td><td>Website, intake form, personal case pages. Clients never leave Squarespace. No third-party interfaces visible.</td></tr>
+      <tr><td><strong>Airtable</strong></td><td>Case database</td><td>Stores every case, tracks status, gives notaries a filtered view of their work. Never visible to clients.</td></tr>
+      <tr><td><strong>Zapier</strong></td><td>Automation engine</td><td>Connects all tools. Watches Airtable for changes. Fires WhatsApp messages and emails automatically. No human needed.</td></tr>
+      <tr><td><strong>Google Drive</strong></td><td>Document storage</td><td>Stores uploaded and prepared documents. Each case has its own folder with controlled access.</td></tr>
+      <tr><td><strong>Stripe</strong></td><td>Payments</td><td>Handles the advance deposit. Simple payment link. No checkout setup. Triggers case creation via webhook.</td></tr>
+      <tr><td><strong>WhatsApp</strong></td><td>Client notifications</td><td>Primary notification channel. Instant delivery. No spam folders. Works on every smartphone. Ideal for Romanian market.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- DESIGN CHOICES -->
+  <p class="sum-head">Design choices</p>
+  <div class="choice-list">
+    <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>Clients never see a third-party tool.</strong><span>Every client touchpoint is Squarespace. The platform feels like a single product.</span></div></div>
+    <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>No custom code.</strong><span>No developers needed to build or maintain it. Commercial tools with support teams and documentation.</span></div></div>
+    <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>Payment triggers the case.</strong><span>No case is opened until the deposit is paid. This is intentional. It filters serious clients and eliminates no-shows from the start.</span></div></div>
+    <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>WhatsApp over email.</strong><span>Email lands in spam. WhatsApp lands on the screen. For Romanian clients, it is the natural communication channel.</span></div></div>
+    <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>Automation is the product.</strong><span>The right message at the right moment, sent automatically. That is what clients experience as quality and reliability.</span></div></div>
+    <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>Simple over clever.</strong><span>When two approaches work, pick the simpler one. Simpler is faster to build, easier to fix, and more reliable under real conditions.</span></div></div>
+  </div>
+
+  <!-- NUMBERS -->
+  <p class="sum-head">Numbers</p>
+  <div class="stats-strip">
+    <div class="stat-box"><span class="stat-num">~&euro;95</span><span class="stat-label">Monthly operating cost<br>once live</span></div>
+    <div class="stat-box"><span class="stat-num">15w</span><span class="stat-label">From zero<br>to launch</span></div>
+    <div class="stat-box"><span class="stat-num">&euro;0</span><span class="stat-label">Custom development<br>cost</span></div>
+  </div>
+  <div class="stats-strip dark">
+    <div class="stat-box"><span class="stat-num">100+</span><span class="stat-label">Cases per month before<br>any rebuild is needed</span></div>
+    <div class="stat-box"><span class="stat-num">&euro;200</span><span class="stat-label">Minimum monthly revenue<br>per notary office</span></div>
+    <div class="stat-box"><span class="stat-num">7</span><span class="stat-label">Step-by-step annexes<br>included in this doc</span></div>
+  </div>
+
+  <!-- LIMITATIONS -->
+  <p class="sum-head">Honest limitations &mdash; and the upgrade path</p>
+  <div class="limit-row"><div class="lim">Manual case page creation per new case</div><div class="res">Automated at 30+ cases/month via Squarespace API + Zapier</div></div>
+  <div class="limit-row"><div class="lim">Manual monthly invoicing to notary offices</div><div class="res">Automated via Stripe subscriptions at 20+ offices</div></div>
+  <div class="limit-row"><div class="lim">Google Drive upload shows Google branding</div><div class="res">File Request Pro (~$49/month) embeds a white-label upload widget directly in Squarespace</div></div>
+  <div class="limit-row"><div class="lim">No live calendar booking — manual slot confirmation</div><div class="res">Acuity Scheduling can be added when notary offices are ready for it</div></div>
+  <div class="limit-row"><div class="lim">WhatsApp Business API approval takes a few days</div><div class="res">Email is the fallback during setup; WhatsApp replaces it once approved</div></div>
+  <div class="limit-row"><div class="lim">Single language</div><div class="res">Weglot plugin (~&euro;15/month) adds multi-language support</div></div>
+
+  <div class="bottom-line">
+    <p>This platform is live in 15 weeks at roughly &euro;80&ndash;115/month. One person can run it. Every limitation has a named, costed upgrade path. The full architecture, rationale, and step-by-step build instructions follow below.</p>
+  </div>
+
+</div>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 0 ══ -->
+<h1 class="first">0.&nbsp; Philosophy &amp; Design Decisions</h1>
+
+<p>This document defines the MVP architecture for a Notary-as-a-Service platform. It is built on Squarespace, with Airtable as the back-office engine, Zapier connecting everything, Google Drive for document storage, Stripe for payments, and WhatsApp for client notifications.</p>
+
+<h3>Guiding principles</h3>
+<ul>
+  <li><strong>One case, one flow, two views.</strong> The client view and the notary view are two faces of the same case record.</li>
+  <li><strong>Clients never see a third-party tool.</strong> Every touchpoint is native Squarespace.</li>
+  <li><strong>Airtable stays behind the curtain.</strong> It is an operations tool. Not a feature. Not visible to clients.</li>
+  <li><strong>No custom code on critical paths.</strong> No JavaScript-driven dynamic pages. No runtime failures.</li>
+  <li><strong>Simple over clever.</strong> When two approaches work, choose the one that requires less maintenance.</li>
+</ul>
+
+<h3>Key decisions vs. original draft</h3>
+<table>
+  <colgroup><col style="width:20%"><col style="width:24%"><col style="width:26%"><col style="width:30%"></colgroup>
+  <thead><tr><th>Decision</th><th>Original</th><th>Revised</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td>Case creation trigger</td><td>Squarespace form submission</td><td>Stripe payment confirmation</td><td>No case exists until a deposit is paid. Filters serious clients.</td></tr>
+    <tr><td>Client case page</td><td>JS-driven dynamic page fetching Airtable API</td><td>Individual password-protected page per case</td><td>Security, reliability, zero coding risk.</td></tr>
+    <tr><td>Notary dashboard</td><td>Airtable iframe embedded in Squarespace</td><td>Squarespace hub links directly to Airtable</td><td>No branding clash. Tools are kept separate.</td></tr>
+    <tr><td>File uploads</td><td>Squarespace form only (10MB limit)</td><td>Google Drive File Request on /thank-you page</td><td>No practical size limit. No Google account needed for clients.</td></tr>
+    <tr><td>Client notifications</td><td>Email via Zapier</td><td>WhatsApp primary, email fallback</td><td>Email lands in spam. WhatsApp delivers instantly to the screen.</td></tr>
+    <tr><td>Payment</td><td>Not included</td><td>Stripe deposit gates case creation</td><td>Prevents no-shows. Simplest possible payment integration.</td></tr>
+    <tr><td>GDPR</td><td>Checkboxes + privacy page</td><td>Full DPA stack + data flow documentation</td><td>Legal obligation when handling Romanian identity documents.</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 1 ══ -->
+<h1>1.&nbsp; System Architecture Overview</h1>
+
+<p>Each tool has a single, clear responsibility. No tool does another tool's job.</p>
+
+<div class="callout">
+  <p class="c-title">Architecture flow</p>
+  <p>Client submits form on /start &rarr; redirected to /thank-you &rarr; uploads documents &rarr; pays Stripe deposit &rarr; selects appointment window</p>
+  <p><strong>Stripe payment triggers Zapier.</strong> Zapier creates the Airtable record, generates the access code, creates Google Drive folders, sends WhatsApp + email to client.</p>
+  <p>Client receives case page link &rarr; Notary reviews in Airtable &rarr; status updates fire WhatsApp messages automatically &rarr; Appointment confirmed &rarr; Case completed.</p>
+</div>
+
+<table>
+  <colgroup><col style="width:18%"><col style="width:40%"><col style="width:42%"></colgroup>
+  <thead><tr><th>Tool</th><th>Owns</th><th>Does not own</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Squarespace</strong></td><td>Public site, intake form, client case pages, notary Member Area hub, /thank-you page</td><td>Live data, case status logic, automation triggers</td></tr>
+    <tr><td><strong>Airtable</strong></td><td>All case records, status tracking, notary working interface, admin oversight, automation relay</td><td>Any client-facing page or publicly visible UI</td></tr>
+    <tr><td><strong>Zapier</strong></td><td>All automation workflows connecting every tool</td><td>Data storage, user interfaces, business logic</td></tr>
+    <tr><td><strong>Google Drive</strong></td><td>All uploaded and prepared documents</td><td>Case metadata, status, workflow logic</td></tr>
+    <tr><td><strong>Stripe</strong></td><td>Advance deposit, payment webhooks, case creation trigger</td><td>Case data, documents, notifications</td></tr>
+    <tr><td><strong>WhatsApp</strong></td><td>All real-time client notifications</td><td>Case data, documents, any operational logic</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 2 ══ -->
+<h1>2.&nbsp; Public Website — Squarespace</h1>
+
+<p class="lv"><strong>Plan required:</strong> Business — verify current pricing at squarespace.com</p>
+<p class="lv"><strong>Reason:</strong> Business is the minimum tier for form code injection, custom CSS, and native Zapier integration</p>
+
+<h3>Page structure</h3>
+<table>
+  <colgroup><col style="width:22%"><col style="width:20%"><col style="width:58%"></colgroup>
+  <thead><tr><th>URL</th><th>Page</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>/</td><td>Home</td><td>Single value proposition. One CTA button leading to /start.</td></tr>
+    <tr><td>/how-it-works</td><td>How It Works</td><td>Three-step explanation. Sets expectations before the client starts.</td></tr>
+    <tr><td>/documents</td><td>Supported Documents</td><td>Powers of Attorney, Declarations, Affidavits, Consent Declarations, Mandates.</td></tr>
+    <tr><td>/for-notaries</td><td>For Notary Offices</td><td>Subscription tiers and contact CTA for notary offices.</td></tr>
+    <tr><td>/start</td><td>Start Your Request</td><td>Intake form. The primary entry point into the platform flow.</td></tr>
+    <tr><td>/thank-you</td><td>Thank You</td><td>Document upload + Stripe payment + appointment preference. Three sequential steps on one page.</td></tr>
+    <tr><td>/privacy-policy</td><td>Privacy Policy</td><td>Full GDPR-compliant policy listing all data processors.</td></tr>
+    <tr><td>/terms-of-service</td><td>Terms of Service</td><td>Platform terms.</td></tr>
+    <tr><td>/gdpr-data-request</td><td>GDPR Data Request</td><td>Form for clients to request data export or deletion.</td></tr>
+  </tbody>
+</table>
+
+<h3>Design principles</h3>
+<ul>
+  <li>Single-purpose pages. No competing CTAs.</li>
+  <li>Mobile-first. The majority of clients are likely on smartphones.</li>
+  <li>Every page leads to /start within two clicks.</li>
+  <li>No visible third-party widgets on the public site.</li>
+</ul>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 3 ══ -->
+<h1>3.&nbsp; Case Creation Flow</h1>
+
+<p>The flow has two phases. Phase one happens on /start. Phase two happens on /thank-you. The case is not created until the end of phase two, when Stripe payment is confirmed.</p>
+
+<h2>3A. Phase One — Intake Form (/start)</h2>
+
+<p>The form collects structured data about the client and their request.</p>
+
+<h4>How the redirect works</h4>
+<p>In Squarespace, open the form block settings. Under "Post-Submit", select "Redirect to URL" and enter <code>/thank-you</code>. That is all. When the client submits the form, Squarespace sends them directly to /thank-you. No code needed. This feature is included in the Squarespace Business plan.</p>
+
+<h4>Form fields</h4>
+<ul>
+  <li>Document Type (dropdown): Power of Attorney / Declaration / Affidavit / Sworn Statement / Consent Declaration for Minors / Mandate</li>
+  <li>Full Name</li>
+  <li>Email Address — used as the client's identity key throughout the platform</li>
+  <li>Phone Number (mandatory) — used for WhatsApp notifications</li>
+  <li>Date of Birth</li>
+  <li>Country of Residence (dropdown: EU countries)</li>
+  <li>Specific Request Details (text area, 500 characters max)</li>
+  <li>Preferred Notary Office (dropdown: onboarded offices, or 'No preference')</li>
+  <li>Three required legal checkboxes (all mandatory to submit):
+    <ul>
+      <li>I understand this service does not constitute legal advice</li>
+      <li>I consent to the processing of my personal data as described in the Privacy Policy</li>
+      <li>I understand that a physical notary appointment is required to finalise my documents</li>
+    </ul>
+  </li>
+</ul>
+
+<h2>3B. Phase Two — The /thank-you Page</h2>
+
+<p>This page does the real work. It presents three sequential steps clearly. The client cannot skip any of them.</p>
+
+<div class="ty-steps">
+  <div class="ty-step">
+    <div class="ty-num">1</div>
+    <div class="ty-content">
+      <strong>Upload your documents</strong>
+      <span>Client clicks "Upload Documents" and is taken to a Google Drive File Request page. They upload their identity document (required) and any supporting files. No Google account needed. No file size limit.</span>
+      <div class="upgrade-note">UI note: The upload button is styled natively in Squarespace. The upload itself opens on a Google-branded page — this cannot be avoided with Google Drive. For a fully white-label upload experience embedded directly in the page, File Request Pro (~$49/month) is the recommended upgrade. It renders a branded upload widget inside Squarespace with no Google branding visible.</div>
+    </div>
+  </div>
+  <div class="ty-step">
+    <div class="ty-num">2</div>
+    <div class="ty-content">
+      <strong>Pay the advance deposit</strong>
+      <span>Client clicks the Stripe payment button. They are taken to a Stripe-hosted checkout page to pay the fixed advance deposit (e.g. &euro;50). Stripe handles all payment security. The client is returned to the platform after payment.</span>
+    </div>
+  </div>
+  <div class="ty-step">
+    <div class="ty-num">3</div>
+    <div class="ty-content">
+      <strong>Select a preferred appointment window</strong>
+      <span>A Squarespace form block asks for: first preferred date, second preferred date (optional), preferred time of day (Morning / Afternoon / Evening), and any scheduling notes. This form is submitted independently from payment.</span>
+    </div>
+  </div>
+</div>
+
+<div class="callout">
+  <p class="c-title">What the client sees on the /thank-you page</p>
+  <p>"Your request has been received. Please complete the three steps below to open your case. Once your payment is confirmed, you will receive a WhatsApp message with your case reference and a personal link to track your case."</p>
+</div>
+
+<h2>3C. What Happens After Payment — Fully Automatic</h2>
+
+<div class="callout">
+  <p class="c-title">How the automation works</p>
+  <p>When the client completes payment on Stripe, Stripe instantly fires a webhook — a silent, automatic signal — to Zapier. This happens in seconds. No human is involved at any point.</p>
+  <p>Zapier receives the webhook and executes the following actions in sequence: creates the Airtable case record with all form data, generates the 8-character Client Access Code, creates the Google Drive case folder structure, sends the client a WhatsApp message with their Case ID and magic link, and sends the client a fallback confirmation email.</p>
+  <p><strong>The client receives their case link within seconds of payment clearing.</strong></p>
+</div>
+
+<div class="callout warn">
+  <p class="c-title">Important — Zapier plan requirement</p>
+  <p>The Stripe webhook trigger is "instant" on Zapier Starter plan (~&euro;28/month) and above. On the free Zapier plan, it would poll every 15 minutes — unacceptably slow. The Starter plan is required for this automation to work as described.</p>
+</div>
+
+<h3>File naming instruction for clients</h3>
+<p>Ask clients to name their uploaded files using the format: <code>FirstnameLastname_DocumentType</code> (e.g. <code>IonPopescu_Passport.pdf</code>). This makes it easier to sort incoming uploads into the correct case folder. Include this instruction clearly on the /thank-you page.</p>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 4 ══ -->
+<h1>4.&nbsp; Airtable — The Back-Office Engine</h1>
+
+<p>No client ever sees Airtable. It serves five roles, all essential to the platform.</p>
+
+<div class="callout">
+  <p class="c-title">Design principle</p>
+  <p>Airtable is a professional operations tool — like email or a spreadsheet. Notary offices and the platform admin use it directly. It is never embedded in Squarespace. Never shown to clients. Never presented as a feature of the platform.</p>
+</div>
+
+<h2>Role 1 — Case Database</h2>
+<p>Every Stripe payment creates a structured Airtable record. This record is the single source of truth for that case. All data lives here. All updates are written here.</p>
+
+<h4>Cases table — full field reference</h4>
+<table>
+  <colgroup><col style="width:28%"><col style="width:18%"><col style="width:54%"></colgroup>
+  <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td>Case ID</td><td>Auto-number</td><td>Auto-generated: CASE-2026-XXXXXX</td></tr>
+    <tr><td>Status</td><td>Single select</td><td>Submitted / In Review / Booked / Completed</td></tr>
+    <tr><td>Client Name</td><td>Text</td><td>From intake form</td></tr>
+    <tr><td>Client Email</td><td>Email</td><td>Primary identifier. Used for fallback email notifications.</td></tr>
+    <tr><td>Client Phone</td><td>Phone</td><td>Used for WhatsApp notifications via Zapier.</td></tr>
+    <tr><td>Date of Birth</td><td>Date</td><td>For identity verification.</td></tr>
+    <tr><td>Country</td><td>Single select</td><td>Country of residence.</td></tr>
+    <tr><td>Document Type</td><td>Single select</td><td>Power of Attorney, Affidavit, etc.</td></tr>
+    <tr><td>Request Details</td><td>Long text</td><td>Client notes from the intake form.</td></tr>
+    <tr><td>Assigned Notary Office</td><td>Linked record</td><td>Links to the Notary Offices table.</td></tr>
+    <tr><td>Submission Date</td><td>Date</td><td>Set by Zapier when the record is created.</td></tr>
+    <tr><td>Last Updated</td><td>Last modified time</td><td>Auto-updates on any field change.</td></tr>
+    <tr><td>Client Access Code</td><td>Text</td><td>8-character alphanumeric code. Used in the magic link URL. Generated by Zapier.</td></tr>
+    <tr><td>Document Links</td><td>Long text</td><td>Google Drive URLs for client-uploaded and notary-prepared documents.</td></tr>
+    <tr><td>Preferred Date Range</td><td>Text</td><td>Client's preferred appointment dates and times. From the /thank-you form.</td></tr>
+    <tr><td>Booking Date</td><td>Date</td><td>Confirmed appointment date. Filled by admin or notary.</td></tr>
+    <tr><td>Booking Time</td><td>Text</td><td>Confirmed time slot. Filled by admin or notary.</td></tr>
+    <tr><td>Payment Status</td><td>Single select</td><td>Unpaid / Paid / Refunded</td></tr>
+    <tr><td>Stripe Payment ID</td><td>Text</td><td>Stripe Checkout Session ID. Used for reconciliation and refunds. Set by Zapier.</td></tr>
+    <tr><td>Advance Amount Paid</td><td>Currency</td><td>Amount received. Set by Zapier from Stripe webhook.</td></tr>
+    <tr><td>Payment Date</td><td>Date</td><td>Date payment was confirmed. Set by Zapier.</td></tr>
+    <tr><td>Internal Notes</td><td>Long text</td><td>Notary and admin working notes. Never shared with the client.</td></tr>
+    <tr><td>Consent Recorded</td><td>Checkbox</td><td>Confirmed GDPR consent was obtained at form submission.</td></tr>
+  </tbody>
+</table>
+
+<h2>Role 2 — Status Tracking</h2>
+<p>The Status field is the most important field in the system. Every client-facing notification is triggered automatically by a change to this field.</p>
+
+<div class="status-row">
+  <div class="s-badge"><span class="s-num">01</span><span class="s-name">Submitted</span><span class="s-desc">Payment received. Case open.</span></div>
+  <div class="s-badge"><span class="s-num">02</span><span class="s-name">In Review</span><span class="s-desc">Notary preparing documents.</span></div>
+  <div class="s-badge"><span class="s-num">03</span><span class="s-name">Booked</span><span class="s-desc">Appointment confirmed.</span></div>
+  <div class="s-badge"><span class="s-num">04</span><span class="s-name">Completed</span><span class="s-desc">Case closed.</span></div>
+</div>
+
+<p>"Submitted" is set by Zapier when the Stripe payment webhook fires. It is the first status a case ever has. It cannot be set manually by a notary — it is always a product of a successful payment.</p>
+
+<div class="callout warn">
+  <p class="c-title">Why Squarespace alone cannot do this</p>
+  <p>Squarespace email automations only trigger on: form submission, product purchase, or mailing list signup. There is no way to watch a data field and fire a conditional message when it changes. Airtable + Zapier is the only reliable non-code solution for status-driven notifications.</p>
+</div>
+
+<h2>Role 3 — Notary Working Interface</h2>
+<p>Each notary office gets a filtered Airtable view showing only their cases. They update the Status field directly in Airtable. Each status update automatically fires a WhatsApp notification to the client.</p>
+
+<h4>What notaries see</h4>
+<ul>
+  <li>Case ID, client name, document type, submission date, current status</li>
+  <li>Google Drive link for reviewing uploaded identity documents</li>
+  <li>Internal Notes field for working notes</li>
+  <li>Preferred Date Range (to confirm appointment slot)</li>
+</ul>
+
+<h4>What notaries cannot see</h4>
+<ul>
+  <li>Cases assigned to other notary offices</li>
+  <li>Subscription and billing data</li>
+  <li>Admin-only fields</li>
+</ul>
+
+<h2>Role 4 — Admin Oversight</h2>
+<p>The platform operator has full access to all records. Key admin views:</p>
+<ul>
+  <li><strong>All Cases</strong> — complete list across all offices and statuses</li>
+  <li><strong>By Status</strong> — spot bottlenecks instantly</li>
+  <li><strong>By Notary Office</strong> — monitor workload per office</li>
+  <li><strong>Overdue</strong> — cases where status has not changed in more than 7 days</li>
+</ul>
+
+<h2>Role 5 — Zapier Relay Point</h2>
+<p>Every automated action either reads from, writes to, or is triggered by Airtable.</p>
+<table>
+  <colgroup><col style="width:32%"><col style="width:35%"><col style="width:33%"></colgroup>
+  <thead><tr><th>Trigger in Airtable</th><th>Zapier action</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>New record created (by Stripe webhook)</td><td>Send WhatsApp + fallback email to client with magic link</td><td>Client receives case page link within seconds</td></tr>
+    <tr><td>Status → In Review</td><td>Send WhatsApp to client: "Your case is being prepared"</td><td>Client stays informed without any manual action</td></tr>
+    <tr><td>Status → Booked</td><td>Send WhatsApp to client with confirmed date, time, office address</td><td>Client receives appointment confirmation</td></tr>
+    <tr><td>Status → Completed</td><td>Send WhatsApp to client with document download links</td><td>Client receives finalised documents</td></tr>
+    <tr><td>Booking Date field updated</td><td>Send WhatsApp to client with confirmed appointment details</td><td>Appointment slot locked in</td></tr>
+    <tr><td>Record age &gt; 12 months</td><td>Delete record and Google Drive folder; log deletion</td><td>GDPR retention compliance enforced</td></tr>
+  </tbody>
+</table>
+
+<h2>Secondary Table — Notary Offices</h2>
+<table>
+  <colgroup><col style="width:28%"><col style="width:18%"><col style="width:54%"></colgroup>
+  <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td>Office Name</td><td>Text</td><td>Business name.</td></tr>
+    <tr><td>Contact Email</td><td>Email</td><td>Primary contact.</td></tr>
+    <tr><td>Contact Phone</td><td>Phone</td><td>Office phone.</td></tr>
+    <tr><td>City</td><td>Text</td><td>Operating city.</td></tr>
+    <tr><td>Subscription Status</td><td>Single select</td><td>Trial / Active / Inactive</td></tr>
+    <tr><td>Monthly Fee</td><td>Currency</td><td>Agreed monthly fee (&euro;200&ndash;500).</td></tr>
+    <tr><td>Assigned Cases</td><td>Linked records</td><td>All cases linked to this office.</td></tr>
+    <tr><td>Squarespace Login Email</td><td>Email</td><td>Email used for Member Area access.</td></tr>
+    <tr><td>Airtable View Link</td><td>URL</td><td>Direct link to their filtered Airtable view.</td></tr>
+    <tr><td>Onboarding Date</td><td>Date</td><td>Date the office was activated.</td></tr>
+    <tr><td>Internal Notes</td><td>Long text</td><td>Admin notes.</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 5 ══ -->
+<h1>5.&nbsp; Client Access — Personal Case Pages</h1>
+
+<p>Every client gets a private Squarespace page for their case. The page is accessible via a magic link — no login, no account, no password to remember.</p>
+
+<div class="callout">
+  <p class="c-title">The magic link system</p>
+  <p>Each client's case page URL embeds their unique 8-character access code as a parameter:</p>
+  <p><code>acte.online/case-001234?password=ABC12345</code></p>
+  <p>When the link is clicked, Squarespace bypasses the password screen automatically. The client lands directly on their case page. Zero friction.</p>
+</div>
+
+<h3>Page architecture</h3>
+<p>One Squarespace page per case. Pages sit inside a private folder — invisible in site navigation. Each page is password-protected with the client's unique access code. Pages are named <code>/case-XXXXXX</code> to match the Case ID.</p>
+
+<h4>Why individual pages instead of a dynamic page</h4>
+<ul>
+  <li><strong>Security.</strong> Client data is static content in Squarespace, not fetched from an API exposed in the browser. No API key is ever visible to the client.</li>
+  <li><strong>Reliability.</strong> A static Squarespace page cannot fail at runtime. A JavaScript API call can.</li>
+  <li><strong>Maintainability.</strong> Any non-technical person can update a Squarespace page. No code debugging required.</li>
+</ul>
+
+<h3>Case page content by status</h3>
+<table>
+  <colgroup><col style="width:18%"><col style="width:82%"></colgroup>
+  <thead><tr><th>Status</th><th>What the client sees on their page</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Submitted</strong></td><td>Case reference, submission date, document type. Message: "Your case is open. A notary will review it shortly."</td></tr>
+    <tr><td><strong>In Review</strong></td><td>Assigned notary office name and estimated timeline added to the page.</td></tr>
+    <tr><td><strong>Booked</strong></td><td>Confirmed appointment date, time, and notary office address. Booking details block visible.</td></tr>
+    <tr><td><strong>Completed</strong></td><td>Google Drive download links for finalised documents. Case closed message.</td></tr>
+  </tbody>
+</table>
+
+<p style="font-size:9pt;color:#777;font-weight:300;">Always visible at the bottom of every case page: support contact (support@acte.online) and link to /gdpr-data-request.</p>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 6 ══ -->
+<h1>6.&nbsp; Notary Access — The Gateway Hub</h1>
+
+<p>The Squarespace Member Area is the branded front door for notary offices. The actual case work — reviewing, updating status, accessing documents — happens in Airtable, accessed with one click from inside the Member Area.</p>
+
+<div class="callout">
+  <p class="c-title">The gateway principle</p>
+  <p>Squarespace provides the interface. Airtable provides the working tool. Each is accessed directly, without embedding one inside the other. Notaries are never asked to work inside an embedded iframe with Airtable's branding showing through.</p>
+</div>
+
+<h3>Why not embed Airtable inside Squarespace?</h3>
+<p>Iframes in Squarespace cannot be targeted by the site's CSS. Airtable renders with its own fonts, colours, and UI chrome. The result is a jarring visual inconsistency inside what should be a professional platform. The gateway model avoids this entirely.</p>
+
+<h3>Notary onboarding — manual at MVP</h3>
+<ol>
+  <li>Platform operator contacts or receives inbound from a notary office.</li>
+  <li>Admin creates the office's account in Squarespace Members using their primary contact email.</li>
+  <li>Admin creates a filtered Airtable view for that office. Copies the share link.</li>
+  <li>Admin sends a welcome email: Squarespace login link, Airtable view link, how-to guide link.</li>
+  <li>Brief onboarding call recommended — 20 minutes is sufficient.</li>
+</ol>
+
+<div class="callout warn">
+  <p class="c-title">Why manual onboarding is right for MVP</p>
+  <p>Up to 10 offices can be onboarded manually with low overhead. Self-service registration adds account approval logic, payment gating, and automated credential delivery — not justified at this stage. Clear upgrade target for Architecture 2.</p>
+</div>
+
+<h3>Member Area page structure</h3>
+<table>
+  <colgroup><col style="width:35%"><col style="width:45%"><col style="width:20%"></colgroup>
+  <thead><tr><th>Page</th><th>Content</th><th>Nature</th></tr></thead>
+  <tbody>
+    <tr><td>/notary-dashboard</td><td>Welcome message. Single "Your Cases" button linking to Airtable filtered view.</td><td>Static</td></tr>
+    <tr><td>/notary-dashboard/how-to</td><td>Step-by-step workflow guide. Receiving a case, reviewing in Airtable, updating status, completing a case.</td><td>Updated when process changes</td></tr>
+    <tr><td>/notary-dashboard/resources</td><td>Document templates, compliance notes, platform announcements, FAQ.</td><td>Occasionally updated</td></tr>
+    <tr><td>/notary-dashboard/support</td><td>Support contact, escalation path, response time expectations.</td><td>Static</td></tr>
+  </tbody>
+</table>
+
+<h2>Notary Workflow — Step by Step</h2>
+<div class="flow">
+
+  <div class="flow-step">
+    <div class="f-num">1</div>
+    <div class="f-body"><strong>New case notification</strong><p>Notary receives a WhatsApp message (and fallback email) with Case ID, document type, and client name. They log into the Squarespace Member Area.</p></div>
+  </div>
+
+  <div class="flow-step">
+    <div class="f-num">2</div>
+    <div class="f-body"><strong>Open case list</strong><p>Notary clicks "Your Cases" on the dashboard. Opens their filtered Airtable view — showing only their assigned cases.</p></div>
+  </div>
+
+  <div class="flow-step">
+    <div class="f-num">3</div>
+    <div class="f-body"><strong>Review the case</strong><p>Notary opens the case record. Reviews client details and request notes. Clicks the Google Drive link to access uploaded identity documents.</p></div>
+  </div>
+
+  <div class="flow-step">
+    <div class="f-num">4</div>
+    <div class="f-body"><strong>Begin preparation — update status to In Review</strong><p>Notary changes Status to "In Review". <span class="tag-auto">Automatic</span> Zapier detects this within seconds and sends the client a WhatsApp: "Your case is being prepared by [Office Name]."</p></div>
+  </div>
+
+  <div class="flow-step">
+    <div class="f-num">5</div>
+    <div class="f-body"><strong>Request clarification if needed</strong><p>Notary adds a note in Internal Notes and contacts the client directly. Once resolved, preparation continues.</p></div>
+  </div>
+
+  <div class="flow-step">
+    <div class="f-num">6</div>
+    <div class="f-body"><strong>Confirm appointment slot</strong><p>Notary reviews the client's preferred dates from the Airtable record. Updates Booking Date and Booking Time fields. <span class="tag-auto">Automatic</span> Zapier sends the client a WhatsApp confirmation with the exact date, time, and office address.</p></div>
+  </div>
+
+  <div class="flow-step">
+    <div class="f-num">7</div>
+    <div class="f-body"><strong>Update status to Booked</strong><p>Notary changes Status to "Booked". <span class="tag-auto">Automatic</span> Zapier sends the client a WhatsApp confirming the appointment is locked in.</p></div>
+  </div>
+
+  <div class="flow-step">
+    <div class="f-num">8</div>
+    <div class="f-body"><strong>Mark case complete</strong><p>After the appointment, notary changes Status to "Completed". <span class="tag-auto">Automatic</span> Zapier sends the client a WhatsApp with document download links. The 12-month GDPR retention clock starts.</p></div>
+  </div>
+
+</div>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 7 ══ -->
+<h1>7.&nbsp; Notifications — WhatsApp + Email</h1>
+
+<p>WhatsApp is the primary notification channel. Email is the fallback. Both are sent automatically by Zapier.</p>
+
+<div class="callout">
+  <p class="c-title">Why WhatsApp over email</p>
+  <p>Email can land in spam, promotions folders, or simply go unread. WhatsApp delivers directly to the client's screen. For Romanian clients — in Romania and abroad — WhatsApp is the dominant messaging app across all age groups. Delivery is instant. Read rates are far higher than email.</p>
+</div>
+
+<h3>WhatsApp setup</h3>
+<p class="lv"><strong>Tool:</strong> WhatsApp Business API via Zapier (multiple providers supported, including Twilio)</p>
+<p class="lv"><strong>Cost:</strong> Two components. Meta charges ~€0.03&ndash;0.06 per conversation (a 24-hour window, regardless of how many messages are sent within it). Twilio adds ~$0.005 per message on top. At MVP volume — 30 cases/month, 3&ndash;4 status messages per case — expect €5&ndash;15/month in total.</p>
+<p class="lv"><strong>Setup time:</strong> WhatsApp Business API approval takes a few days. Apply early — before launch.</p>
+<p class="lv"><strong>Fallback:</strong> While WhatsApp Business API approval is pending, all notifications are sent by email only.</p>
+
+<h3>Email setup</h3>
+<p class="lv"><strong>Tool:</strong> Gmail via Zapier</p>
+<p class="lv"><strong>Cost:</strong> Included in Google Workspace subscription</p>
+<p class="lv"><strong>Branding:</strong> Emails are sent from your platform address (e.g. hello@acte.online). Full HTML template supported — logo, platform colours, Helvetica, single-column layout. Built once in a tool like Stripo (free), pasted into Zapier. Every automated email uses the same branded template.</p>
+<p class="lv"><strong>Deliverability:</strong> Configure SPF and DKIM records on your domain before launch to minimise spam filtering.</p>
+
+<h3>Notification map</h3>
+<table>
+  <colgroup><col style="width:28%"><col style="width:36%"><col style="width:36%"></colgroup>
+  <thead><tr><th>Event</th><th>WhatsApp message (primary)</th><th>Email (fallback)</th></tr></thead>
+  <tbody>
+    <tr><td>Payment confirmed / case opened</td><td>"Your case [ID] is open. Here is your personal case link: [link]"</td><td>Same content in branded email template</td></tr>
+    <tr><td>Status → In Review</td><td>"Your case is being prepared by [Office Name]."</td><td>Same content</td></tr>
+    <tr><td>Appointment confirmed (Booked)</td><td>"Your appointment is confirmed: [Date], [Time], [Address]."</td><td>Same content</td></tr>
+    <tr><td>Status → Completed</td><td>"Your case is complete. Download your documents here: [link]"</td><td>Same content with download links</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 8 ══ -->
+<h1>8.&nbsp; Payment &amp; Booking</h1>
+
+<p>Payment and booking preference are both captured on the /thank-you page — before the case is opened. This is intentional. It commits the client before any notary does any work.</p>
+
+<h2>8A. Advance Deposit — Stripe</h2>
+
+<p class="lv"><strong>Tool:</strong> Stripe Payment Links (standalone — no Squarespace Commerce required)</p>
+<p class="lv"><strong>Transaction fee:</strong> 1.4% + &euro;0.25 per EU card transaction</p>
+<p class="lv"><strong>Recommended deposit:</strong> &euro;30&ndash;75, fixed, set by the platform operator</p>
+
+<h4>How it works</h4>
+<ul>
+  <li>Create one Stripe Payment Link for the advance deposit product (e.g. "Notary Appointment Deposit — &euro;50").</li>
+  <li>Embed this link as a styled button on the /thank-you page.</li>
+  <li>The client clicks, is taken to Stripe-hosted checkout, pays, and is returned to the platform.</li>
+  <li>Configure the Stripe Payment Link to collect the client's email address and pass their Case ID as a custom metadata field. This allows Zapier to match the payment to the correct Airtable record.</li>
+</ul>
+
+<div class="callout">
+  <p class="c-title">Stripe vs. Squarespace Commerce</p>
+  <p>Squarespace Commerce requires a product catalogue, a checkout flow, and a higher-tier plan. A Stripe Payment Link is created in under two minutes. No additional Squarespace plan needed. Full control over refunds and reporting in the Stripe Dashboard.</p>
+</div>
+
+<h2>8B. Appointment Preference Form</h2>
+
+<p class="lv"><strong>Tool:</strong> Squarespace form block (native, included in Business plan)</p>
+<p class="lv"><strong>Location:</strong> On the /thank-you page, below the Stripe payment button</p>
+
+<h4>Form fields</h4>
+<ul>
+  <li>Preferred date — first choice (date picker)</li>
+  <li>Preferred date — second choice (date picker, optional)</li>
+  <li>Preferred time of day (dropdown: Morning 09:00–12:00 / Afternoon 12:00–16:00 / Evening 16:00–18:00)</li>
+  <li>Additional notes (optional)</li>
+</ul>
+
+<p>This form is submitted independently from payment. Zapier writes the preferences to the Airtable Preferred Date Range field. The notary reviews these preferences when confirming the appointment slot.</p>
+
+<div class="callout warn">
+  <p class="c-title">Why not a live calendar?</p>
+  <p>Romanian notary offices have variable availability — court schedules, walk-in clients, colleagues absent. A live calendar assumes predictable slots. A preference form is more realistic at MVP and avoids double-bookings. Acuity Scheduling can be added as an upgrade when offices are ready for it.</p>
+</div>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 9 ══ -->
+<h1>9.&nbsp; Automation Workflows — Zapier</h1>
+
+<p class="lv"><strong>Recommended plan:</strong> Zapier Starter (~&euro;28/month) — 750 tasks/month, sufficient for MVP</p>
+<p class="lv"><strong>Monitoring:</strong> Check task usage monthly. Upgrade to Professional if approaching the limit.</p>
+
+<h2>Workflow 1 — Case Creation (Triggered by Stripe)</h2>
+<p class="lv"><strong>Trigger:</strong> Stripe Checkout Session Completed (instant webhook)</p>
+<ul>
+  <li>Find the corresponding Squarespace form submission in Airtable using client email + Case ID from Stripe metadata.</li>
+  <li>Create a new record in the Airtable Cases table. Map all form fields.</li>
+  <li>Generate an 8-character alphanumeric Client Access Code. Store in the record.</li>
+  <li>Set Status = "Submitted", Payment Status = "Paid", Stripe Payment ID = session ID.</li>
+  <li>Create Google Drive folder: /Cases/CASE-ID/Client-Uploads/ and /Cases/CASE-ID/Prepared-Documents/</li>
+  <li>Send client a WhatsApp message with Case ID and magic link.</li>
+  <li>Send client a fallback confirmation email with the same content.</li>
+  <li>If a notary office was pre-selected: send that office a WhatsApp/email notification.</li>
+</ul>
+
+<div class="callout warn">
+  <p class="c-title">Form data bridging note</p>
+  <p>The Squarespace form is submitted before payment. Zapier needs to connect the Stripe payment to the correct form submission. The recommended approach: when the client submits the form, Zapier stores the form data temporarily in Airtable as a "pending" record (no Case ID yet). When the Stripe payment fires, Zapier matches by client email and upgrades the pending record to a full case record. Full setup is covered in Annex E.</p>
+</div>
+
+<h2>Workflow 2 — Status Change → Client Notification</h2>
+<p class="lv"><strong>Trigger:</strong> Airtable record updated (Status field change detected)</p>
+<ul>
+  <li>Filter: only continue if Status has changed.</li>
+  <li>Path A — Status = "In Review": WhatsApp to client: "Your case is being reviewed and prepared by [Office Name]."</li>
+  <li>Path B — Status = "Booked": WhatsApp to client with confirmed appointment date, time, and notary office address.</li>
+  <li>Path C — Status = "Completed": WhatsApp to client with Google Drive document download links.</li>
+  <li>Each path also sends a fallback email with the same content.</li>
+</ul>
+
+<h2>Workflow 3 — Booking Confirmation</h2>
+<p class="lv"><strong>Trigger:</strong> Airtable record updated (Booking Date field updated)</p>
+<ul>
+  <li>Filter: only continue if Booking Date is not empty.</li>
+  <li>Send client a WhatsApp with the confirmed appointment date, time, and notary office address.</li>
+  <li>Send fallback email with the same content.</li>
+</ul>
+
+<h2>Workflow 4 — Appointment Preference Captured</h2>
+<p class="lv"><strong>Trigger:</strong> Squarespace form submission (appointment preference form on /thank-you)</p>
+<ul>
+  <li>Find the matching Airtable case record by client email.</li>
+  <li>Write the preferred dates and time preference into the Preferred Date Range field.</li>
+</ul>
+
+<h2>Workflow 5 — GDPR Data Retention</h2>
+<p class="lv"><strong>Trigger:</strong> Zapier scheduled task (runs daily at 02:00)</p>
+<ul>
+  <li>Find all Airtable records where Status = "Completed" AND Submission Date is older than 12 months.</li>
+  <li>Delete the Airtable case record.</li>
+  <li>Delete the corresponding Google Drive case folder and all contents.</li>
+  <li>Log the deletion in a "Deletion Audit" table: Case ID, deletion date, reason. No personal data stored.</li>
+</ul>
+
+<h2>Workflow 6 — Automated Case Page Creation (Optional, MVP+)</h2>
+<p>Not required at launch. Add at 30+ cases/month when manual page creation becomes a bottleneck.</p>
+<ul>
+  <li>Trigger: New Airtable case record created.</li>
+  <li>Duplicate a template Squarespace case page via the Squarespace API.</li>
+  <li>Set the URL slug to the Case ID and the password to the Client Access Code.</li>
+</ul>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 10 ══ -->
+<h1>10.&nbsp; File Storage — Google Drive</h1>
+
+<p class="lv"><strong>Tool:</strong> Google Workspace Business Starter (~&euro;6/user/month)</p>
+<p class="lv"><strong>Access control:</strong> Admin controls all access. Notaries get per-case access only.</p>
+
+<div class="callout upgrade">
+  <p class="c-title">Upgrade path — white-label uploads</p>
+  <p>Google Drive File Request opens on a Google-branded page. This is unavoidable with the free Google Drive option. For a fully white-label experience — where the upload widget lives inside Squarespace with no Google branding visible — <strong>File Request Pro (~$49/month)</strong> is the recommended upgrade. It embeds directly in Squarespace, syncs files to Google Drive behind the scenes, and requires no Google account from the client. The architecture remains identical. Only the upload UI changes.</p>
+</div>
+
+<h3>Folder structure</h3>
+<table>
+  <colgroup><col style="width:42%"><col style="width:58%"></colgroup>
+  <thead><tr><th>Path</th><th>Contents</th></tr></thead>
+  <tbody>
+    <tr><td>/NaaS-Platform/Cases/CASE-ID/Client-Uploads/</td><td>Documents uploaded by the client via File Request</td></tr>
+    <tr><td>/NaaS-Platform/Cases/CASE-ID/Prepared-Documents/</td><td>Documents prepared and uploaded by the notary</td></tr>
+    <tr><td>/NaaS-Platform/Incoming-Uploads/</td><td>Raw File Request uploads. Sorted to cases by admin daily.</td></tr>
+    <tr><td>/NaaS-Platform/Templates/</td><td>Document templates for notary offices</td></tr>
+    <tr><td>/NaaS-Platform/Admin/</td><td>Invoices, DPAs, subscription records</td></tr>
+  </tbody>
+</table>
+
+<h3>Access control rules</h3>
+<ul>
+  <li><strong>Admin:</strong> Full access to all folders.</li>
+  <li><strong>Notary offices:</strong> Per-case access only — granted when assigned, revoked when completed.</li>
+  <li><strong>Clients:</strong> Individual file download links only. No folder access.</li>
+  <li><strong>No public links:</strong> All sharing set to "Specific people only". Never "Anyone with the link".</li>
+</ul>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 11 ══ -->
+<h1>11.&nbsp; GDPR &amp; Data Compliance</h1>
+
+<p>This platform handles sensitive personal data — identity documents, dates of birth, legal declarations. GDPR compliance is a legal obligation. It must be completed before the first live case.</p>
+
+<div class="callout warn">
+  <p class="c-title">Legal obligation</p>
+  <p>Romania is an EU member state. The platform operator is a Data Controller under GDPR. Each notary office is a Data Processor. Identity documents require: explicit recorded consent, a clear legal basis for processing, appropriate access controls, and a signed Data Processing Agreement with every notary office.</p>
+</div>
+
+<h3>Data residency</h3>
+<table>
+  <colgroup><col style="width:18%"><col style="width:18%"><col style="width:28%"><col style="width:36%"></colgroup>
+  <thead><tr><th>Tool</th><th>Location</th><th>GDPR mechanism</th><th>Required action</th></tr></thead>
+  <tbody>
+    <tr><td>Squarespace</td><td>US-based</td><td>Standard Contractual Clauses (SCCs)</td><td>Sign DPA at squarespace.com/privacy</td></tr>
+    <tr><td>Airtable</td><td>US-based</td><td>SCCs (MVP). EU residency available on Business+ plan.</td><td>Sign Airtable DPA</td></tr>
+    <tr><td>Google Drive</td><td>US-based by default</td><td>SCCs with proper configuration</td><td>Enable Google Workspace DPA. Restrict sharing to named users only.</td></tr>
+    <tr><td>Zapier</td><td>US-based</td><td>SCCs</td><td>Sign DPA at zapier.com/privacy</td></tr>
+    <tr><td>Stripe</td><td>EU processing available</td><td>GDPR-compliant. EU processing addendum available.</td><td>Enable Stripe DPA and EU processing addendum.</td></tr>
+    <tr><td>WhatsApp/Twilio</td><td>US-based</td><td>SCCs</td><td>Sign Twilio DPA. Review WhatsApp Business data policy.</td></tr>
+  </tbody>
+</table>
+
+<h3>Required actions before launch</h3>
+<ol>
+  <li>Sign a DPA with every tool: Squarespace, Airtable, Google Workspace, Zapier, Stripe, Twilio/WhatsApp.</li>
+  <li>Sign a Data Processing Agreement with each notary office.</li>
+  <li>Document the complete data flow (Record of Processing Activities — required under GDPR Article 30).</li>
+  <li>Publish a GDPR-compliant Privacy Policy at /privacy-policy. Must list: data categories, legal basis, all processors, retention periods, data subject rights.</li>
+  <li>Publish Terms of Service at /terms-of-service.</li>
+  <li>Activate /gdpr-data-request with a working form.</li>
+  <li>Configure Zapier Workflow 5 (12-month auto-deletion) before processing any live cases.</li>
+  <li>Set all Google Drive case folders to "Specific people only". Never "Anyone with the link".</li>
+  <li>Configure Airtable field and view permissions — notaries see only their own cases.</li>
+</ol>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 12 ══ -->
+<h1>12.&nbsp; Monetisation</h1>
+
+<p>Revenue comes from monthly subscriptions charged to notary offices. Client-side fees are not included at MVP. A transaction fee layer can be added in Architecture 2.</p>
+
+<h3>Subscription tiers</h3>
+<table>
+  <colgroup><col style="width:16%"><col style="width:16%"><col style="width:22%"><col style="width:46%"></colgroup>
+  <thead><tr><th>Tier</th><th>Monthly fee</th><th>Case volume</th><th>Included</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Entry</strong></td><td>&euro;200/month</td><td>Up to 15 cases</td><td>Standard support, 1 Squarespace login, 1 Airtable view</td></tr>
+    <tr><td><strong>Standard</strong></td><td>&euro;350/month</td><td>Up to 35 cases</td><td>Priority support, 2 logins, custom intake routing</td></tr>
+    <tr><td><strong>Premium</strong></td><td>&euro;500/month</td><td>Unlimited</td><td>Dedicated support, 3 logins, custom reporting view, onboarding assistance</td></tr>
+  </tbody>
+</table>
+
+<h3>Invoicing — manual at MVP</h3>
+<ol>
+  <li>Invoice sent by the 1st of each month (Wave, Stripe Invoicing, or PDF).</li>
+  <li>Payment via bank transfer or Stripe payment link.</li>
+  <li>Subscription status updated manually in Airtable.</li>
+  <li>If payment lapses: deactivate Squarespace Member Area account and pause case assignment.</li>
+</ol>
+
+<div class="callout warn">
+  <p class="c-title">Why not automated billing at MVP?</p>
+  <p>Up to 10 offices. Manual invoicing takes under 30 minutes per month. Automated Stripe subscriptions tied to Member Area access add significant setup complexity. This is the right upgrade for Architecture 2.</p>
+</div>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 13 ══ -->
+<h1>13.&nbsp; Technology Stack &amp; Costs</h1>
+
+<table>
+  <colgroup><col style="width:20%"><col style="width:26%"><col style="width:16%"><col style="width:38%"></colgroup>
+  <thead><tr><th>Component</th><th>Tool</th><th>Est. monthly cost</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td>Website &amp; forms</td><td>Squarespace Business</td><td>~&euro;21 (annual)</td><td>Public site, intake form, client case pages, notary hub, /thank-you</td></tr>
+    <tr><td>Member Area</td><td>Included in Squarespace</td><td>Included</td><td>Gated notary gateway hub</td></tr>
+    <tr><td>Case database</td><td>Airtable Team</td><td>&euro;0&ndash;10/user</td><td>Case records, status tracking, notary tool, admin oversight</td></tr>
+    <tr><td>Automation</td><td>Zapier Starter</td><td>~&euro;28</td><td>All workflows: form → payment → case → notifications → GDPR</td></tr>
+    <tr><td>File storage</td><td>Google Workspace Starter</td><td>~&euro;6/user</td><td>Document uploads, prepared documents, access control</td></tr>
+    <tr><td>Payments</td><td>Stripe</td><td>1.4% + &euro;0.25/transaction</td><td>Advance deposit, webhook triggers case creation</td></tr>
+    <tr><td>Notifications (primary)</td><td>WhatsApp Business API / Twilio</td><td>~€5&ndash;15</td><td>Meta conversation fees (~€0.03&ndash;0.06/conversation) + Twilio per-message fees (~$0.005). At MVP volume: 30 cases/month, 3&ndash;4 messages per case.</td></tr>
+    <tr><td>Notifications (fallback)</td><td>Gmail via Zapier</td><td>Included</td><td>Fallback email for all notifications</td></tr>
+    <tr><td>Upload upgrade (optional)</td><td>File Request Pro</td><td>~$49</td><td>White-label upload widget embedded in Squarespace. Replaces Google Drive File Request when brand consistency is a priority.</td></tr>
+    <tr><td>Booking upgrade (optional)</td><td>Acuity Scheduling</td><td>~&euro;15&ndash;25</td><td>Live calendar self-booking. Add when notary offices are ready.</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Estimated total monthly operating cost: ~&euro;80&ndash;115/month</strong> (excl. Stripe per-transaction fees and optional upgrades).</p>
+<p style="font-size:9pt;color:#777;font-weight:300;">Verify Squarespace plan pricing and features at squarespace.com before committing. Plan features evolve.</p>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 14 ══ -->
+<h1>14.&nbsp; Implementation Phases</h1>
+
+<table>
+  <colgroup><col style="width:24%"><col style="width:56%"><col style="width:20%"></colgroup>
+  <thead><tr><th>Phase</th><th>What gets built</th><th>Timing</th></tr></thead>
+  <tbody>
+    <tr><td><strong>1 — Foundation</strong></td><td>Squarespace public site and all pages. Intake form. Airtable tables and fields. Google Drive folder structure. Zapier form → pending record automation.</td><td>Weeks 1&ndash;3</td></tr>
+    <tr><td><strong>2 — Payment &amp; Case Creation</strong></td><td>Stripe account and Payment Link. Google Drive File Request. /thank-you page with three sequential steps. Zapier Workflow 1 (Stripe webhook → case creation → WhatsApp + email). WhatsApp Business API application submitted.</td><td>Weeks 3&ndash;6</td></tr>
+    <tr><td><strong>3 — Client Access</strong></td><td>Client case page templates for each status. Magic link system (access codes, password bypass). All client notification templates (WhatsApp + email). Zapier Workflows 2, 3, and 4. WhatsApp Business API approved and tested.</td><td>Weeks 6&ndash;9</td></tr>
+    <tr><td><strong>4 — Notary Access</strong></td><td>Squarespace Member Area hub. Airtable filtered views per office. Onboard 1&ndash;2 pilot offices. Test full notary workflow end-to-end.</td><td>Weeks 9&ndash;11</td></tr>
+    <tr><td><strong>5 — Compliance, Testing &amp; Launch</strong></td><td>All GDPR requirements and DPAs signed. Privacy Policy and Terms of Service published. Zapier Workflow 5 (GDPR deletion) activated. 5 simulated cases. Beta with 1&ndash;2 live offices. Soft launch. Full launch after 10 clean cases.</td><td>Weeks 11&ndash;15</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 15 ══ -->
+<h1>15.&nbsp; Scaling</h1>
+
+<table>
+  <colgroup><col style="width:22%"><col style="width:34%"><col style="width:44%"></colgroup>
+  <thead><tr><th>Volume threshold</th><th>What breaks</th><th>Upgrade path</th></tr></thead>
+  <tbody>
+    <tr><td>30+ cases/month</td><td>Manual case page creation is a bottleneck</td><td>Automate via Squarespace API + Zapier (Workflow 6)</td></tr>
+    <tr><td>50+ cases/month</td><td>Manual onboarding is slow. Zapier task limit approaches 750/month.</td><td>Upgrade to Zapier Professional. Introduce self-service notary registration.</td></tr>
+    <tr><td>100+ cases/month</td><td>Airtable Free plan 1,200-record limit</td><td>Upgrade to Airtable Plus (~&euro;10/user/month)</td></tr>
+    <tr><td>20+ notary offices</td><td>Manual subscription management is unsustainable</td><td>Integrate Stripe subscriptions. Automate Member Area access gating.</td></tr>
+    <tr><td>Multi-language needed</td><td>Squarespace supports one language natively</td><td>Add Weglot plugin (~&euro;15/month)</td></tr>
+    <tr><td>Custom portal needed</td><td>Static Squarespace pages can't support dynamic client experiences</td><td>Evaluate Softr or Stacker — Airtable frontends with full brand control</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 16 ══ -->
+<h1>16.&nbsp; Risks &amp; Mitigations</h1>
+
+<table>
+  <colgroup><col style="width:30%"><col style="width:10%"><col style="width:10%"><col style="width:50%"></colgroup>
+  <thead><tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr></thead>
+  <tbody>
+    <tr><td>Client confusion with magic link WhatsApp message</td><td>Medium</td><td>High</td><td>Short, clear message copy. Support contact on every case page.</td></tr>
+    <tr><td>WhatsApp Business API approval delayed</td><td>Medium</td><td>Medium</td><td>Apply early. Email fallback covers all notifications during the wait.</td></tr>
+    <tr><td>Stripe payment not matched to Airtable case record</td><td>Low</td><td>Medium</td><td>Pass Case ID as Stripe metadata. Test thoroughly before launch. (See Annex C.)</td></tr>
+    <tr><td>Incoming Drive uploads not linked to correct case</td><td>Medium</td><td>Medium</td><td>Clear file naming instruction on /thank-you page. Admin sorts Incoming-Uploads daily.</td></tr>
+    <tr><td>Notaries resist using Airtable</td><td>Medium</td><td>High</td><td>Hands-on 20-minute onboarding call. Written how-to guide in Member Area hub.</td></tr>
+    <tr><td>Squarespace plan changes affect Member Areas</td><td>Medium</td><td>Medium</td><td>Verify plan features before building. Gateway model needs minimal Member Areas capability.</td></tr>
+    <tr><td>GDPR audit or data subject access request</td><td>Low</td><td>High</td><td>Complete all DPAs before launch. Document data flows. Activate GDPR request form. Enforce 12-month deletion.</td></tr>
+    <tr><td>Zapier 750 task/month limit exceeded</td><td>Low at MVP</td><td>Medium</td><td>Monitor monthly usage. Upgrade to Professional if approaching limit.</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+
+<!-- ═══════════════════════════════════════════════════════ SECTION 17 ══ -->
+<h1>17.&nbsp; Final Note</h1>
+
+<p>This architecture uses tools that exist, in ways they were designed to be used. No tool is being pushed beyond its limits. No tool is being asked to do another tool's job.</p>
+
+<div class="three-box">
+  <div class="three-box-item">
+    <div class="three-box-num">1</div>
+    <div class="three-box-content">
+      <strong>Clients never see a third-party tool.</strong>
+      <p>Every client touchpoint is Squarespace. The platform feels like a single product — because for clients, it is.</p>
+    </div>
+  </div>
+  <div class="three-box-item">
+    <div class="three-box-num">2</div>
+    <div class="three-box-content">
+      <strong>Airtable is an operations tool, not a platform feature.</strong>
+      <p>Notaries use it directly as they would use email. The Squarespace hub is their professional front door.</p>
+    </div>
+  </div>
+  <div class="three-box-item">
+    <div class="three-box-num">3</div>
+    <div class="three-box-content">
+      <strong>The automation is the product.</strong>
+      <p>The right WhatsApp message at the right moment, sent automatically. That is what clients experience as quality and care. It requires no human. It never misses.</p>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top:32px;">Each component has a defined upgrade path. The architecture can scale without a rebuild.</p>
+
+<div class="pb"></div>
+
+<!-- ══════════════════════════════════════════════════════ ANNEXES ══ -->
+<div class="annex-cover">
+  <p class="a-eyebrow">Annexes</p>
+  <h1 style="border:none;margin:0 0 8px 0;padding:0;font-size:32pt;">Build &amp; Operations<br>Instructions</h1>
+  <p>Step-by-step guides for every key task. Written at two levels: non-technical (for operators) and technical (for builders). Read the relevant annex before starting each phase.</p>
+</div>
+
+<div class="pb"></div>
+
+<!-- ══════════════════════════════════════════════════ ANNEX A ══ -->
+<h1 class="first">Annex A — Setting Up Airtable</h1>
+
+<h2>A1. Create the Account and Base</h2>
+<h4>Steps</h4>
+<ol>
+  <li>Go to airtable.com. Create an account with your platform admin email.</li>
+  <li>Click "Add a base" → "Start from scratch".</li>
+  <li>Name the base: <strong>NaaS Platform</strong>.</li>
+  <li>You will see a default table called "Table 1". This becomes your Cases table.</li>
+</ol>
+
+<h2>A2. Build the Cases Table</h2>
+<h4>Steps</h4>
+<ol>
+  <li>Double-click "Table 1" tab and rename it to <strong>Cases</strong>.</li>
+  <li>For each field below, click "+" at the end of the column headers. Select the field type from the dropdown.</li>
+</ol>
+<table>
+  <colgroup><col style="width:28%"><col style="width:20%"><col style="width:52%"></colgroup>
+  <thead><tr><th>Field name</th><th>Type</th><th>Configuration</th></tr></thead>
+  <tbody>
+    <tr><td>Case ID</td><td>Auto number</td><td>Format: CASE-2026-{number}. Set in field settings → Format.</td></tr>
+    <tr><td>Status</td><td>Single select</td><td>Options: Submitted / In Review / Booked / Completed</td></tr>
+    <tr><td>Client Name</td><td>Single line text</td><td>No special configuration.</td></tr>
+    <tr><td>Client Email</td><td>Email</td><td>No special configuration.</td></tr>
+    <tr><td>Client Phone</td><td>Phone number</td><td>No special configuration.</td></tr>
+    <tr><td>Date of Birth</td><td>Date</td><td>Format: DD/MM/YYYY</td></tr>
+    <tr><td>Country</td><td>Single select</td><td>Add EU countries as options.</td></tr>
+    <tr><td>Document Type</td><td>Single select</td><td>Power of Attorney / Declaration / Affidavit / Consent Declaration / Mandate</td></tr>
+    <tr><td>Request Details</td><td>Long text</td><td>No special configuration.</td></tr>
+    <tr><td>Assigned Notary Office</td><td>Link to another record</td><td>Link to Notary Offices table. Create that table first (A3).</td></tr>
+    <tr><td>Submission Date</td><td>Date</td><td>Format: DD/MM/YYYY</td></tr>
+    <tr><td>Last Updated</td><td>Last modified time</td><td>Track all fields.</td></tr>
+    <tr><td>Client Access Code</td><td>Single line text</td><td>Populated by Zapier. No manual configuration.</td></tr>
+    <tr><td>Document Links</td><td>Long text</td><td>Will hold Google Drive folder URLs.</td></tr>
+    <tr><td>Preferred Date Range</td><td>Long text</td><td>Client's appointment preferences from the /thank-you form.</td></tr>
+    <tr><td>Booking Date</td><td>Date</td><td>Confirmed appointment date. Filled by admin or notary.</td></tr>
+    <tr><td>Booking Time</td><td>Single line text</td><td>Confirmed time slot. Filled by admin or notary.</td></tr>
+    <tr><td>Payment Status</td><td>Single select</td><td>Options: Unpaid / Paid / Refunded</td></tr>
+    <tr><td>Stripe Payment ID</td><td>Single line text</td><td>Populated by Zapier from Stripe webhook.</td></tr>
+    <tr><td>Advance Amount Paid</td><td>Currency</td><td>EUR format. Populated by Zapier.</td></tr>
+    <tr><td>Payment Date</td><td>Date</td><td>Populated by Zapier when payment confirmed.</td></tr>
+    <tr><td>Internal Notes</td><td>Long text</td><td>Notary and admin use only. Never visible to clients.</td></tr>
+    <tr><td>Consent Recorded</td><td>Checkbox</td><td>Checked by Zapier on case creation.</td></tr>
+  </tbody>
+</table>
+
+<h2>A3. Build the Notary Offices Table</h2>
+<ol>
+  <li>Click "+" next to the Cases tab to add a new table.</li>
+  <li>Name it: <strong>Notary Offices</strong>.</li>
+  <li>Add fields: Office Name (text), Contact Email (email), Contact Phone (phone), City (text), Subscription Status (single select: Trial/Active/Inactive), Monthly Fee (currency EUR), Assigned Cases (linked to Cases), Squarespace Login Email (email), Airtable View Link (URL), Onboarding Date (date), Internal Notes (long text).</li>
+</ol>
+
+<h2>A4. Create Filtered Views for Notary Offices</h2>
+<p>Repeat for each office.</p>
+<ol>
+  <li>In the Cases table, open the Views panel (top-left). Click "+ Add a view" → Grid view. Name it: [Office Name] — Cases.</li>
+  <li>Click Filter → Add filter → "Assigned Notary Office" → "is" → select the office.</li>
+  <li>Click Hide fields. Hide: Client Access Code, Internal Notes, Stripe Payment ID. Show only: Case ID, Status, Client Name, Document Type, Submission Date, Document Links, Booking Date, Booking Time, Preferred Date Range.</li>
+  <li>Click "Share view" → Enable sharing → Copy the link. Paste it into the office's Airtable View Link field.</li>
+</ol>
+<div class="annex-note"><strong>Technical note:</strong> Shared views are read-only. For notaries to update Status (to trigger Zapier), give them Editor access to the base via Airtable's field permission settings (available on Team plan). On Free plan, have notaries request status updates by WhatsApp or email — admin updates Airtable.</div>
+
+<div class="pb"></div>
+
+<!-- ══════════════════════════════════════════════════ ANNEX B ══ -->
+<h1 class="first">Annex B — Google Drive Setup &amp; File Request</h1>
+
+<h2>B1. Create the Folder Structure</h2>
+<ol>
+  <li>Log into Google Drive with your platform admin Google Workspace account.</li>
+  <li>In My Drive, create the top-level folder: <strong>NaaS-Platform</strong>.</li>
+  <li>Inside it, create: <strong>Cases</strong>, <strong>Incoming-Uploads</strong>, <strong>Templates</strong>, <strong>Admin</strong>.</li>
+  <li>Do not create case subfolders manually. Zapier creates them automatically on case creation.</li>
+</ol>
+
+<h2>B2. Create the Google Drive File Request</h2>
+<ol>
+  <li>Open the Incoming-Uploads folder.</li>
+  <li>Click "+ New" → "File request". (This option requires Google Workspace — not available on free Google accounts.)</li>
+  <li>Title: "Upload Your Documents — [Your Platform Name]".</li>
+  <li>Add a description explaining what to upload: passport or national ID (required), supporting documents (optional).</li>
+  <li>Click "Copy link". Embed this URL as the "Upload Documents" button on your /thank-you page in Squarespace.</li>
+  <li>Test: open the link in a private browser window (not logged into Google). Confirm you can upload without signing in.</li>
+</ol>
+
+<div class="callout upgrade">
+  <p class="c-title">Upgrade path — File Request Pro</p>
+  <p>If Google's branding on the upload page is a concern, replace Google Drive File Request with <strong>File Request Pro (~$49/month)</strong>. It embeds a fully white-label upload widget inside Squarespace — the client never leaves your site. Files sync automatically to your Google Drive folder. Setup is covered in the File Request Pro documentation. The rest of this architecture remains unchanged.</p>
+</div>
+
+<h2>B3. Configure Per-Case Access for Notary Offices</h2>
+<p>Repeat for each case assigned to a notary.</p>
+<ol>
+  <li>Navigate to /Cases/CASE-ID/ in Google Drive.</li>
+  <li>Right-click the folder → Share → enter the notary office's email.</li>
+  <li>Set permission to "Viewer" (view and download, no delete or move).</li>
+  <li>Uncheck "Notify people" — the notary will be notified via the platform's own WhatsApp/email.</li>
+  <li>When the case is completed: Share → click the notary's name → Remove access.</li>
+</ol>
+<div class="annex-note"><strong>Technical note:</strong> At higher volume, automate this via Zapier using the Google Drive "Share a folder" action. Trigger: Airtable Assigned Notary Office field is populated. The notary's email is pulled from the Notary Offices table.</div>
+
+<div class="pb"></div>
+
+<!-- ══════════════════════════════════════════════════ ANNEX C ══ -->
+<h1 class="first">Annex C — Stripe Payment Link Setup</h1>
+
+<h2>C1. Create the Stripe Account</h2>
+<ol>
+  <li>Go to stripe.com. Create an account. Select Romania as your country.</li>
+  <li>Complete business verification (requires registration documents).</li>
+  <li>Use Test mode for all setup and testing. Switch to Live mode only when all tests pass.</li>
+</ol>
+
+<h2>C2. Create the Advance Deposit Product</h2>
+<ol>
+  <li>In Stripe Dashboard → Product catalogue → Add product.</li>
+  <li>Name: <strong>Notary Appointment — Advance Deposit</strong></li>
+  <li>Description: "Advance deposit to confirm your notary appointment. This amount will be deducted from your total fee on the day of the appointment."</li>
+  <li>Pricing: One-time payment → set amount (e.g. &euro;50.00) → Currency: EUR → Save product.</li>
+</ol>
+
+<h2>C3. Create the Payment Link</h2>
+<ol>
+  <li>Stripe Dashboard → Payment links → + New.</li>
+  <li>Select the advance deposit product.</li>
+  <li>After payment: set redirect URL to a /payment-confirmed page on Squarespace (a simple static page).</li>
+  <li>Under Custom fields: add a field — Label: "Case Reference Number", Type: Text (required). Clients enter their Case ID here. Zapier uses this to match the payment to the correct Airtable record.</li>
+  <li>Click "Create link". Copy the URL. Embed it as a styled button on the /thank-you page.</li>
+</ol>
+<div class="annex-note"><strong>Technical note — automated Case ID matching:</strong> For a more robust match (no manual entry by client), use Zapier to generate a unique Stripe Payment Link per case via the Stripe API. Zapier creates the link when the form is submitted, pre-populating the Case ID in the URL. The client receives a payment link that already knows who they are. This is the recommended approach at volume above 20 cases/month.</div>
+
+<h2>C4. Test the Payment Flow</h2>
+<ol>
+  <li>In Stripe Test mode, use card number: 4242 4242 4242 4242, any future expiry, any 3-digit CVC.</li>
+  <li>Complete a test payment. Confirm the session appears in Stripe Dashboard under Payments.</li>
+  <li>Verify the completed session contains the Case ID in the custom field.</li>
+  <li>Connect Zapier (Annex E, Workflow 1). Trigger a test payment. Confirm: Airtable record created, WhatsApp sent, email sent.</li>
+  <li>Switch to Live mode only after all tests pass.</li>
+</ol>
+
+<div class="pb"></div>
+
+<!-- ══════════════════════════════════════════════════ ANNEX D ══ -->
+<h1 class="first">Annex D — Building Client Case Pages in Squarespace</h1>
+
+<h2>D1. One-Time Setup — Create a Private Folder</h2>
+<ol>
+  <li>In the Squarespace editor, go to Pages.</li>
+  <li>Under "Not Linked" (below main navigation), click "+" → Folder. Name it: <strong>client-cases</strong>. This folder is invisible in site navigation.</li>
+  <li>Inside the folder, create four template pages — one for each status: _template-submitted, _template-in-review, _template-booked, _template-completed. These are duplicated for every new case.</li>
+</ol>
+
+<h2>D2. How the /start → /thank-you Redirect Works</h2>
+<ol>
+  <li>In the Squarespace editor, open the /start page.</li>
+  <li>Click the form block to edit it.</li>
+  <li>In form settings, find "Post-Submit". Select "Redirect to URL".</li>
+  <li>Enter: <code>/thank-you</code></li>
+  <li>Save. When the client submits the form, Squarespace sends them to /thank-you automatically.</li>
+</ol>
+<div class="annex-note">This is a native Squarespace feature. No code required. Available on the Business plan and above.</div>
+
+<h2>D3. Creating a New Case Page</h2>
+<p>Repeat for every new case.</p>
+<ol>
+  <li>Get the Case ID (e.g. CASE-2026-000012) and Client Access Code (e.g. XK7M2QWP) from Airtable.</li>
+  <li>In the Pages panel, find the client-cases folder. Right-click _template-submitted → Duplicate.</li>
+  <li>Rename the page: CASE-2026-000012.</li>
+  <li>Open page settings (gear icon) → URL slug: set to <code>case-2026-000012</code> (lowercase, hyphens).</li>
+  <li>In page settings → Password tab: enable password protection. Set the password to the Client Access Code exactly as it appears in Airtable (case-sensitive).</li>
+  <li>Edit page content: replace placeholder text with client name, document type, submission date, and Case ID.</li>
+  <li>Save and publish.</li>
+  <li>Test: open a private browser window → go to <code>acte.online/case-2026-000012?password=XK7M2QWP</code>. Confirm the page loads without a password prompt.</li>
+</ol>
+
+<h2>D4. Updating a Case Page as Status Changes</h2>
+<table>
+  <colgroup><col style="width:32%"><col style="width:68%"></colgroup>
+  <thead><tr><th>Status change</th><th>Update required</th></tr></thead>
+  <tbody>
+    <tr><td>Submitted → In Review</td><td>Update status badge. Add the assigned notary office name and estimated timeline.</td></tr>
+    <tr><td>In Review → Booked</td><td>Update status badge. Add confirmed appointment date, time, and notary office address. Hide any pending blocks.</td></tr>
+    <tr><td>Booked → Completed</td><td>Update status badge. Add Google Drive download links for finalised documents.</td></tr>
+  </tbody>
+</table>
+
+<div class="pb"></div>
+
+<!-- ══════════════════════════════════════════════════ ANNEX E ══ -->
+<h1 class="first">Annex E — Configuring Zapier Workflows</h1>
+
+<div class="annex-note">Before starting: connect Squarespace (forms), Airtable, Google Drive, Gmail, Stripe, and Twilio/WhatsApp to Zapier. Go to Zapier → Apps → + Add connection. Each app requires you to log in and grant permissions.</div>
+
+<h2>Workflow 1 — Case Creation (Stripe Trigger)</h2>
+<h4>Trigger</h4>
+<p>App: Stripe → Event: Checkout Session Completed (Instant) → Connect your Stripe account → Test with a completed test-mode checkout session.</p>
+<h4>Actions (in order)</h4>
+<ol>
+  <li><strong>Find pending Airtable record:</strong> App: Airtable → Find Record → Base: NaaS Platform → Table: Cases → Search by: Client Email → Search value: customer email from Stripe trigger. This locates the pending record created from the form submission.</li>
+  <li><strong>Generate access code:</strong> App: Zapier Utilities → Generate Random String → 8 characters, alphanumeric.</li>
+  <li><strong>Update Airtable record:</strong> App: Airtable → Update Record → Record ID from step 1 → Set: Status = Submitted, Payment Status = Paid, Stripe Payment ID = Checkout Session ID, Advance Amount Paid = amount, Payment Date = today, Client Access Code = from step 2.</li>
+  <li><strong>Create Google Drive folders:</strong> App: Google Drive → Create Folder → Parent: Cases → Name: Case ID. Repeat to create Client-Uploads and Prepared-Documents subfolders.</li>
+  <li><strong>Send WhatsApp:</strong> App: Twilio (WhatsApp) → Send Message → To: client phone number → Body: "Your case [Case ID] is open. Track it here: acte.online/case-[ID]?password=[Access Code]"</li>
+  <li><strong>Send fallback email:</strong> App: Gmail → Send Email → To: client email → Subject: "Your Case is Open — [Case ID]" → Body: same content in branded HTML template.</li>
+  <li><strong>If notary office pre-selected:</strong> App: Gmail or Twilio → notify the assigned office.</li>
+</ol>
+<div class="annex-note"><strong>Form data bridging:</strong> A separate Zapier workflow (triggered by Squarespace form submission) creates a "pending" record in Airtable with Status = "Pending Payment". This stores all form data. When the Stripe webhook fires in Workflow 1, Zapier finds this pending record by client email and upgrades it to a full case record.</div>
+
+<h2>Workflow 2 — Status Change → Client Notification</h2>
+<h4>Trigger</h4>
+<p>App: Airtable → Updated Record → Table: Cases → Watch field: Status.</p>
+<h4>Actions</h4>
+<ol>
+  <li>Filter by Zapier: only continue if Status has changed.</li>
+  <li>Paths by Zapier — three branches:
+    <ul>
+      <li><strong>Path A (In Review):</strong> WhatsApp + email: "Your case is being reviewed and prepared by [Office Name]."</li>
+      <li><strong>Path B (Booked):</strong> WhatsApp + email: "Your appointment is confirmed: [Date], [Time], [Address]."</li>
+      <li><strong>Path C (Completed):</strong> WhatsApp + email: "Your case is complete. Download your documents: [link]"</li>
+    </ul>
+  </li>
+</ol>
+
+<h2>Workflow 3 — Booking Confirmation</h2>
+<h4>Trigger</h4>
+<p>App: Airtable → Updated Record → Table: Cases → Watch field: Booking Date.</p>
+<h4>Actions</h4>
+<ol>
+  <li>Filter: only continue if Booking Date is not empty.</li>
+  <li>WhatsApp to client: confirmed appointment date, time, and office address.</li>
+  <li>Fallback email with the same content.</li>
+</ol>
+
+<h2>Workflow 4 — Appointment Preference Captured</h2>
+<h4>Trigger</h4>
+<p>App: Squarespace → New Form Submission → select the appointment preference form on /thank-you.</p>
+<h4>Actions</h4>
+<ol>
+  <li>App: Airtable → Find Record → find by client email.</li>
+  <li>App: Airtable → Update Record → write preferred dates and time preference to the Preferred Date Range field.</li>
+</ol>
+
+<h2>Workflow 5 — GDPR Data Retention</h2>
+<h4>Trigger</h4>
+<p>App: Schedule by Zapier → Every Day → 02:00.</p>
+<h4>Actions</h4>
+<ol>
+  <li>App: Airtable → Search Records → Status = Completed AND Submission Date older than 365 days.</li>
+  <li>For each result: Delete Airtable record.</li>
+  <li>For each result: Delete corresponding Google Drive folder.</li>
+  <li>For each result: Create a record in the Deletion Audit table — Case ID, deletion date, reason. No personal data.</li>
+</ol>
+<div class="annex-note"><strong>Technical note:</strong> "Looping by Zapier" (for processing multiple records per run) requires Zapier Professional plan. On Starter, only one record is processed per daily run. This is acceptable at MVP. Upgrade to Professional before your case backlog approaches 12 months old.</div>
+
+<h2>Workflow 6 — Automated Case Page Creation (Optional, MVP+)</h2>
+<h4>Trigger</h4>
+<p>App: Airtable → New Record → Table: Cases.</p>
+<h4>Actions</h4>
+<ol>
+  <li>App: Webhooks by Zapier → POST request to Squarespace Pages API → Duplicate template case page. Full API documentation at developers.squarespace.com.</li>
+  <li>App: Webhooks by Zapier → PUT request → Set URL slug to Case ID. Set password to Client Access Code.</li>
+</ol>
+<div class="annex-note"><strong>Technical note:</strong> Requires Squarespace API access (Business plan) and comfort with API requests. Not required at launch. Add at 30+ cases/month.</div>
+
+<div class="pb"></div>
+
+<!-- ══════════════════════════════════════════════════ ANNEX F ══ -->
+<h1 class="first">Annex F — Onboarding a New Notary Office</h1>
+
+<h2>F1. Pre-Onboarding Checklist</h2>
+<ul>
+  <li>Agree on subscription tier and monthly fee</li>
+  <li>Collect primary contact email (used for Squarespace and Airtable access)</li>
+  <li>Collect office name, city, and phone number for the Airtable record</li>
+  <li>Send and sign a Data Processing Agreement before any case data is shared</li>
+</ul>
+
+<h2>F2. Airtable Setup</h2>
+<ol>
+  <li>Open Airtable → NaaS Platform → Notary Offices table. Create a new record for the office.</li>
+  <li>Go to the Cases table → Views panel → + Add a view → Grid view. Name it: [Office Name] — Cases.</li>
+  <li>Set filter: Assigned Notary Office = [this office]. Hide sensitive fields (Annex A4). Share view → copy link.</li>
+  <li>Paste the link into the Airtable View Link field of the office's record.</li>
+</ol>
+
+<h2>F3. Squarespace Member Area Setup</h2>
+<ol>
+  <li>Squarespace editor → Member Area settings → Members → Add member manually → enter the office's contact email.</li>
+  <li>Set access to the notary Member Area.</li>
+  <li>They will receive an automatic Squarespace invitation to set a password.</li>
+</ol>
+
+<h2>F4. Welcome Message</h2>
+<p>Send a WhatsApp (or email) with: Squarespace Member Area login link, personalised Airtable view link, link to the how-to guide (/notary-dashboard/how-to), and your support contact.</p>
+
+<h2>F5. Onboarding Call — 20 minutes</h2>
+<ul>
+  <li>Walk through the Squarespace Member Area</li>
+  <li>Walk through the Airtable filtered view — columns, status updates, Google Drive links</li>
+  <li>Walk through a sample case end-to-end</li>
+  <li>Explain payment flow: client pays upfront, case arrives ready, deposit already confirmed</li>
+  <li>Explain how to add Internal Notes</li>
+  <li>Set expectations: response times, escalation, support contact</li>
+</ul>
+
+<div class="pb"></div>
+
+<!-- ══════════════════════════════════════════════════ ANNEX G ══ -->
+<h1 class="first">Annex G — Day-to-Day Operations</h1>
+
+<h2>Daily</h2>
+<ul>
+  <li>Check /Incoming-Uploads/ in Google Drive. Move new client uploads to the correct case folder (/Cases/CASE-ID/Client-Uploads/).</li>
+  <li>Check Airtable for overdue cases (Last Updated &gt; 5 days ago AND Status ≠ Completed).</li>
+  <li>Check Zapier task log for failed workflow runs. Fix and re-run if needed.</li>
+  <li>Respond to support messages.</li>
+</ul>
+
+<h2>Per case</h2>
+<ul>
+  <li><strong>New case opened:</strong> Verify Zapier ran correctly (Airtable record created, WhatsApp sent, Google Drive folders created). Create the client case page in Squarespace if Workflow 6 is not yet active (Annex D3).</li>
+  <li><strong>Case assigned to notary:</strong> Grant Google Drive folder access to the notary office (Annex B3).</li>
+  <li><strong>Notary confirms appointment:</strong> Update Booking Date and Booking Time in Airtable. Zapier sends client confirmation automatically.</li>
+  <li><strong>Case completed:</strong> Update client case page to Completed state with document download links.</li>
+</ul>
+
+<h2>Monthly</h2>
+<ul>
+  <li>Send invoices to all active notary offices by the 1st of the month.</li>
+  <li>Update Subscription Status in Airtable when payment received.</li>
+  <li>Check Zapier task usage. Upgrade plan if approaching the limit.</li>
+  <li>Confirm automated deletions are running (check Deletion Audit table).</li>
+</ul>
+
+<h2>Manual fallback — if Zapier fails on case creation</h2>
+<ol>
+  <li>Open Airtable → Cases table → + Add record. Fill in all fields from the Squarespace form submission notification email (Squarespace emails you on every submission — check your inbox).</li>
+  <li>Generate an 8-character alphanumeric code manually (use random.org or any generator). Enter it as the Client Access Code.</li>
+  <li>Create Google Drive folders manually: /Cases/CASE-ID/Client-Uploads/ and /Cases/CASE-ID/Prepared-Documents/.</li>
+  <li>Send the client a WhatsApp (or email) manually with their Case ID and magic link.</li>
+  <li>Investigate and fix the Zapier issue before the next case arrives.</li>
+</ol>
+
+<p style="text-align:center; color:#bbb; font-size:9pt; font-weight:300; margin-top:80px; letter-spacing:2px;">— END OF DOCUMENT —</p>
+
+</body>
+</html>
