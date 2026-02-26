@@ -727,7 +727,8 @@ td strong { font-weight: 700; }
     Getting a document notarised is slow, opaque, and unnecessarily hard.
     This platform fixes that. Clients submit a request, upload their documents,
     pay a deposit, and choose an appointment window — all online, in minutes.
-    Notaries receive a clean, structured case. Both sides are kept informed automatically.
+    One physical appointment is required to sign. Everything before and after it runs on the platform.
+    Notaries receive a clean, structured case. Both sides are kept informed at every step.
     No phone tag. No missed emails. No confusion.
   </p>
   <p class="exec-lead" style="margin-bottom:0;">
@@ -742,7 +743,7 @@ td strong { font-weight: 700; }
     <colgroup><col style="width:18%"><col style="width:42%"><col style="width:40%"></colgroup>
     <thead><tr><th></th><th>Who they are</th><th>What they get</th></tr></thead>
     <tbody>
-      <tr><td><strong>Clients</strong></td><td>Anyone who needs a notarised document &mdash; in Romania or abroad. People who want a clear, simple process instead of phone calls and office visits.</td><td>A guided online flow. Documents submitted once. A private case page to track progress. WhatsApp updates at every step.</td></tr>
+      <tr><td><strong>Clients</strong></td><td>Anyone who needs a notarised document &mdash; in Romania or abroad. People who want a clear, simple process instead of phone calls and office visits.</td><td>A guided online flow. Documents submitted once. One physical appointment to sign. A private case page to track progress. WhatsApp updates at every step.</td></tr>
       <tr><td><strong>Notary offices</strong></td><td>Romanian notary offices subscribing to receive and manage cases through the platform (monthly fee: &euro;200&ndash;500).</td><td>Cases arrive structured and complete. Documents already uploaded. Advance deposit already paid. No admin overhead.</td></tr>
       <tr><td><strong>Platform operator</strong></td><td>The person or team running the platform.</td><td>A low-overhead, automated business. Scales without proportional manual work. Clear upgrade path as volume grows.</td></tr>
     </tbody>
@@ -756,7 +757,7 @@ td strong { font-weight: 700; }
       <div class="num">1</div>
       <div class="content">
         <strong>Fill in a short form</strong>
-        <span>Name, document type, contact details. Takes two minutes. Submitted on the platform website.</span>
+        <span>Name, document type, contact details. City and preferred notary office. Takes two minutes. Submitted on the platform website. City is selected first — this filters the office list to show only offices in that city. The client picks one or leaves it to the platform.</span>
       </div>
     </div>
 
@@ -788,39 +789,55 @@ td strong { font-weight: 700; }
       <div class="num">5</div>
       <div class="content">
         <strong>Case is opened</strong> <span class="tag-auto">Automatic</span><br>
-        <span>Stripe payment triggers Zapier. Zapier creates the Airtable case record, generates a unique access code, creates the Google Drive folder, and sends the client a WhatsApp message — all within seconds. No human involved.</span>
+        <span>Stripe payment triggers Zapier. Zapier creates the Airtable case record, generates a unique access code, creates the Google Drive folder, and sends the client a WhatsApp message — all within seconds.</span>
       </div>
     </div>
 
     <div class="journey-step">
       <div class="num">6</div>
       <div class="content">
-        <strong>Client receives their case link</strong> <span class="tag-auto">Automatic</span><br>
-        <span>A WhatsApp message arrives with the Case ID and a private link to the client's personal case page. The link works immediately. No account or password needed.</span>
+        <strong>Notary office confirmed</strong> <span class="tag-auto">Automatic</span><br>
+        <span>If the client selected a specific office, it is assigned as requested — no override without the client's consent. If no preference was stated, the admin assigns the best available office in the chosen city. The client receives a WhatsApp: "Your case has been assigned to [Office Name]."</span>
       </div>
     </div>
 
     <div class="journey-step">
       <div class="num">7</div>
       <div class="content">
-        <strong>Notary reviews and prepares</strong>
-        <span>The notary opens the case in Airtable. Reviews documents. Prepares the notarial act. Updates the status to In Review &mdash; client receives a WhatsApp update automatically.</span>
+        <strong>Client receives their case link</strong> <span class="tag-auto">Automatic</span><br>
+        <span>The admin creates the client's case page and sends the WhatsApp link once the page is ready. The client lands on a current, up-to-date page. No account or password needed.</span>
       </div>
     </div>
 
     <div class="journey-step">
       <div class="num">8</div>
       <div class="content">
-        <strong>Appointment confirmed</strong>
-        <span>Notary confirms the exact date and time within the client's preferred window. Status moves to Booked. Client receives a WhatsApp confirmation.</span>
+        <strong>Notary reviews and prepares</strong>
+        <span>The notary opens the case in Airtable. Reviews documents. Prepares the notarial act. Updates the status to In Review. The admin updates the case page, then the client receives a WhatsApp update.</span>
       </div>
     </div>
 
     <div class="journey-step">
       <div class="num">9</div>
       <div class="content">
+        <strong>Appointment confirmed</strong>
+        <span>Notary confirms the exact date and time. Status moves to Booked. Admin updates the case page. Client receives a WhatsApp confirmation.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">10</div>
+      <div class="content">
+        <strong>Physical appointment</strong>
+        <span>Client attends the notary office. Signs the document. Pays the remaining balance on the day.</span>
+      </div>
+    </div>
+
+    <div class="journey-step">
+      <div class="num">11</div>
+      <div class="content">
         <strong>Case closed</strong> <span class="tag-auto">Automatic</span><br>
-        <span>After the appointment, the notary marks the case Completed. Client receives a WhatsApp message with a download link for their finalised documents.</span>
+        <span>After the appointment, the notary marks the case Completed. Admin updates the case page with download links. Client receives a WhatsApp with the link to their finalised documents.</span>
       </div>
     </div>
 
@@ -857,7 +874,7 @@ td strong { font-weight: 700; }
     <tbody>
       <tr><td><strong>Squarespace</strong></td><td>Everything clients see</td><td>Website, intake form, personal case pages. Clients never leave Squarespace. No third-party interfaces visible.</td></tr>
       <tr><td><strong>Airtable</strong></td><td>Case database</td><td>Stores every case, tracks status, gives notaries a filtered view of their work. Never visible to clients.</td></tr>
-      <tr><td><strong>Zapier</strong></td><td>Automation engine</td><td>Connects all tools. Watches Airtable for changes. Fires WhatsApp messages and emails automatically. No human needed.</td></tr>
+      <tr><td><strong>Zapier</strong></td><td>Automation engine</td><td>Connects all tools. Watches Airtable for changes. Fires WhatsApp messages and emails on cue.</td></tr>
       <tr><td><strong>Google Drive</strong></td><td>Document storage</td><td>Stores uploaded and prepared documents. Each case has its own folder with controlled access.</td></tr>
       <tr><td><strong>Stripe</strong></td><td>Payments</td><td>Handles the advance deposit. Simple payment link. No checkout setup. Triggers case creation via webhook.</td></tr>
       <tr><td><strong>WhatsApp</strong></td><td>Client notifications</td><td>Primary notification channel. Instant delivery. No spam folders. Works on every smartphone. Ideal for Romanian market.</td></tr>
@@ -871,7 +888,7 @@ td strong { font-weight: 700; }
     <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>No custom code.</strong><span>No developers needed to build or maintain it. Commercial tools with support teams and documentation.</span></div></div>
     <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>Payment triggers the case.</strong><span>No case is opened until the deposit is paid. This is intentional. It filters serious clients and eliminates no-shows from the start.</span></div></div>
     <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>WhatsApp over email.</strong><span>Email lands in spam. WhatsApp lands on the screen. For Romanian clients, it is the natural communication channel.</span></div></div>
-    <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>Automation is the product.</strong><span>The right message at the right moment, sent automatically. That is what clients experience as quality and reliability.</span></div></div>
+    <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>Automation is the backbone.</strong><span>The right message at the right moment, sent on cue. That is what clients experience as quality and reliability.</span></div></div>
     <div class="choice"><div class="c-marker"></div><div class="c-content"><strong>Simple over clever.</strong><span>When two approaches work, pick the simpler one. Simpler is faster to build, easier to fix, and more reliable under real conditions.</span></div></div>
   </div>
 
@@ -891,6 +908,7 @@ td strong { font-weight: 700; }
   <!-- LIMITATIONS -->
   <p class="sum-head">Honest limitations &mdash; and the upgrade path</p>
   <div class="limit-row"><div class="lim">Manual case page creation per new case</div><div class="res">Automated at 30+ cases/month via Squarespace API + Zapier</div></div>
+  <div class="limit-row"><div class="lim">Manual case page update per status change (admin must update before WhatsApp fires)</div><div class="res">Automated via Squarespace API + Zapier once Workflow 6 is active; or via a live Airtable-connected frontend (Softr/Stacker) at higher volume</div></div>
   <div class="limit-row"><div class="lim">Manual monthly invoicing to notary offices</div><div class="res">Automated via Stripe subscriptions at 20+ offices</div></div>
   <div class="limit-row"><div class="lim">Google Drive upload shows Google branding</div><div class="res">File Request Pro (~$49/month) embeds a white-label upload widget directly in Squarespace</div></div>
   <div class="limit-row"><div class="lim">No live calendar booking — manual slot confirmation</div><div class="res">Acuity Scheduling can be added when notary offices are ready for it</div></div>
@@ -945,7 +963,7 @@ td strong { font-weight: 700; }
   <p class="c-title">Architecture flow</p>
   <p>Client submits form on /start &rarr; redirected to /thank-you &rarr; uploads documents &rarr; pays Stripe deposit &rarr; selects appointment window</p>
   <p><strong>Stripe payment triggers Zapier.</strong> Zapier creates the Airtable record, generates the access code, creates Google Drive folders, sends WhatsApp + email to client.</p>
-  <p>Client receives case page link &rarr; Notary reviews in Airtable &rarr; status updates fire WhatsApp messages automatically &rarr; Appointment confirmed &rarr; Case completed.</p>
+  <p>Client receives case page link &rarr; Notary reviews in Airtable &rarr; status updates signal admin to update the case page &rarr; admin marks page ready &rarr; WhatsApp fires to client &rarr; Appointment confirmed &rarr; Case completed.</p>
 </div>
 
 <table>
@@ -1017,7 +1035,8 @@ td strong { font-weight: 700; }
   <li>Date of Birth</li>
   <li>Country of Residence (dropdown: EU countries)</li>
   <li>Specific Request Details (text area, 500 characters max)</li>
-  <li>Preferred Notary Office (dropdown: onboarded offices, or 'No preference')</li>
+  <li>City (dropdown: cities where offices are active) — selected first; triggers the conditional office field below</li>
+  <li>Preferred Notary Office (conditional dropdown: appears after city is selected, showing only offices in that city, plus "No preference — assign one for me" as the first option). Native Squarespace conditional logic — no code needed.</li>
   <li>Three required legal checkboxes (all mandatory to submit):
     <ul>
       <li>I understand this service does not constitute legal advice</li>
@@ -1065,9 +1084,10 @@ td strong { font-weight: 700; }
 
 <div class="callout">
   <p class="c-title">How the automation works</p>
-  <p>When the client completes payment on Stripe, Stripe instantly fires a webhook — a silent, automatic signal — to Zapier. This happens in seconds. No human is involved at any point.</p>
-  <p>Zapier receives the webhook and executes the following actions in sequence: creates the Airtable case record with all form data, generates the 8-character Client Access Code, creates the Google Drive case folder structure, sends the client a WhatsApp message with their Case ID and magic link, and sends the client a fallback confirmation email.</p>
-  <p><strong>The client receives their case link within seconds of payment clearing.</strong></p>
+  <p>When the client completes payment on Stripe, Stripe instantly fires a webhook — a silent, automatic signal — to Zapier. This happens in seconds.</p>
+  <p>Zapier receives the webhook and executes the following actions in sequence: creates the Airtable case record with all form data, generates the 8-character Client Access Code, creates the Google Drive case folder structure, sends the client a WhatsApp message with their Case ID, and sends a fallback confirmation email.</p>
+  <p>The admin then creates the client case page in Squarespace, confirms or assigns the notary office, and grants Google Drive access to that office. Once the case page is ready, the client receives their private case link by WhatsApp.</p>
+  <p><strong>The client receives their case link within minutes of payment clearing.</strong></p>
 </div>
 
 <div class="callout warn">
@@ -1121,11 +1141,12 @@ td strong { font-weight: 700; }
     <tr><td>Payment Date</td><td>Date</td><td>Date payment was confirmed. Set by Zapier.</td></tr>
     <tr><td>Internal Notes</td><td>Long text</td><td>Notary and admin working notes. Never shared with the client.</td></tr>
     <tr><td>Consent Recorded</td><td>Checkbox</td><td>Confirmed GDPR consent was obtained at form submission.</td></tr>
+    <tr><td>Page Ready</td><td>Checkbox</td><td>Checked by admin once the client case page has been updated for the current status. Zapier watches this field to trigger the client WhatsApp notification. Reset to unchecked after each notification fires.</td></tr>
   </tbody>
 </table>
 
 <h2>Role 2 — Status Tracking</h2>
-<p>The Status field is the most important field in the system. Every client-facing notification is triggered automatically by a change to this field.</p>
+<p>The Status field is the most important field in the system. Every client-facing notification is tied to a change to this field — but does not fire directly from it. When the notary updates the status, the admin updates the client case page to reflect the new state, then marks a "Page Ready" checkbox. Zapier watches this checkbox and fires the WhatsApp to the client only once it is checked. This ensures the client always lands on a current, accurate page.</p>
 
 <div class="status-row">
   <div class="s-badge"><span class="s-num">01</span><span class="s-name">Submitted</span><span class="s-desc">Payment received. Case open.</span></div>
@@ -1174,10 +1195,11 @@ td strong { font-weight: 700; }
   <colgroup><col style="width:32%"><col style="width:35%"><col style="width:33%"></colgroup>
   <thead><tr><th>Trigger in Airtable</th><th>Zapier action</th><th>Result</th></tr></thead>
   <tbody>
-    <tr><td>New record created (by Stripe webhook)</td><td>Send WhatsApp + fallback email to client with magic link</td><td>Client receives case page link within seconds</td></tr>
-    <tr><td>Status → In Review</td><td>Send WhatsApp to client: "Your case is being prepared"</td><td>Client stays informed without any manual action</td></tr>
-    <tr><td>Status → Booked</td><td>Send WhatsApp to client with confirmed date, time, office address</td><td>Client receives appointment confirmation</td></tr>
-    <tr><td>Status → Completed</td><td>Send WhatsApp to client with document download links</td><td>Client receives finalised documents</td></tr>
+    <tr><td>New record created (by Stripe webhook)</td><td>Send WhatsApp + fallback email to client with Case ID. Admin creates case page and sends magic link once ready.</td><td>Client receives case page link</td></tr>
+    <tr><td>Assigned Notary Office field populated</td><td>Send WhatsApp to client confirming assigned office name</td><td>Client knows which office is handling their case</td></tr>
+    <tr><td>Page Ready checkbox checked (Status = In Review)</td><td>Send WhatsApp to client: "Your case is being prepared"</td><td>Client stays informed; admin controls timing</td></tr>
+    <tr><td>Page Ready checkbox checked (Status = Booked)</td><td>Send WhatsApp to client with confirmed date, time, office address</td><td>Client receives appointment confirmation</td></tr>
+    <tr><td>Page Ready checkbox checked (Status = Completed)</td><td>Send WhatsApp to client with document download links</td><td>Client receives finalised documents</td></tr>
     <tr><td>Booking Date field updated</td><td>Send WhatsApp to client with confirmed appointment details</td><td>Appointment slot locked in</td></tr>
     <tr><td>Record age &gt; 12 months</td><td>Delete record and Google Drive folder; log deletion</td><td>GDPR retention compliance enforced</td></tr>
   </tbody>
@@ -1191,7 +1213,8 @@ td strong { font-weight: 700; }
     <tr><td>Office Name</td><td>Text</td><td>Business name.</td></tr>
     <tr><td>Contact Email</td><td>Email</td><td>Primary contact.</td></tr>
     <tr><td>Contact Phone</td><td>Phone</td><td>Office phone.</td></tr>
-    <tr><td>City</td><td>Text</td><td>Operating city.</td></tr>
+    <tr><td>City</td><td>Text</td><td>Primary operating city.</td></tr>
+    <tr><td>Cities Served</td><td>Multiple select</td><td>All cities where this office accepts cases. Used to populate the city dropdown on the intake form.</td></tr>
     <tr><td>Subscription Status</td><td>Single select</td><td>Trial / Active / Inactive</td></tr>
     <tr><td>Monthly Fee</td><td>Currency</td><td>Agreed monthly fee (&euro;200&ndash;500).</td></tr>
     <tr><td>Assigned Cases</td><td>Linked records</td><td>All cases linked to this office.</td></tr>
@@ -1207,7 +1230,7 @@ td strong { font-weight: 700; }
 <!-- ═══════════════════════════════════════════════════════ SECTION 5 ══ -->
 <h1>5.&nbsp; Client Access — Personal Case Pages</h1>
 
-<p>Every client gets a private Squarespace page for their case. The page is accessible via a magic link — no login, no account, no password to remember.</p>
+<p>Every client gets a private Squarespace page for their case. The page is accessible via a magic link — no login, no account, no password to remember. The page is static — updated manually by the admin each time the case moves forward. To ensure the client never lands on a stale page, the WhatsApp link is only sent after the admin has updated the page and marked it ready.</p>
 
 <div class="callout">
   <p class="c-title">The magic link system</p>
@@ -1355,10 +1378,11 @@ td strong { font-weight: 700; }
   <colgroup><col style="width:28%"><col style="width:36%"><col style="width:36%"></colgroup>
   <thead><tr><th>Event</th><th>WhatsApp message (primary)</th><th>Email (fallback)</th></tr></thead>
   <tbody>
-    <tr><td>Payment confirmed / case opened</td><td>"Your case [ID] is open. Here is your personal case link: [link]"</td><td>Same content in branded email template</td></tr>
-    <tr><td>Status → In Review</td><td>"Your case is being prepared by [Office Name]."</td><td>Same content</td></tr>
-    <tr><td>Appointment confirmed (Booked)</td><td>"Your appointment is confirmed: [Date], [Time], [Address]."</td><td>Same content</td></tr>
-    <tr><td>Status → Completed</td><td>"Your case is complete. Download your documents here: [link]"</td><td>Same content with download links</td></tr>
+    <tr><td>Payment confirmed / case opened</td><td>"Your case [ID] is open. Your case page link will follow shortly."</td><td>Same content in branded email template</td></tr>
+    <tr><td>Notary office assigned</td><td>"Your case has been assigned to [Office Name]."</td><td>Same content</td></tr>
+    <tr><td>Case page ready (admin) + Status = In Review</td><td>"Your case is being prepared by [Office Name]." + case page link</td><td>Same content</td></tr>
+    <tr><td>Case page ready (admin) + Appointment confirmed</td><td>"Your appointment is confirmed: [Date], [Time], [Address]." + case page link</td><td>Same content</td></tr>
+    <tr><td>Case page ready (admin) + Status = Completed</td><td>"Your case is complete. Download your documents here: [link]"</td><td>Same content with download links</td></tr>
   </tbody>
 </table>
 
@@ -1426,7 +1450,8 @@ td strong { font-weight: 700; }
   <li>Create Google Drive folder: /Cases/CASE-ID/Client-Uploads/ and /Cases/CASE-ID/Prepared-Documents/</li>
   <li>Send client a WhatsApp message with Case ID and magic link.</li>
   <li>Send client a fallback confirmation email with the same content.</li>
-  <li>If a notary office was pre-selected: send that office a WhatsApp/email notification.</li>
+  <li>If a notary office was pre-selected by the client: assign it in Airtable and notify admin to confirm availability. If unavailable, admin contacts client by WhatsApp to agree on an alternative before any change is made.</li>
+  <li>If no preference was stated: admin assigns the best available office in the selected city. Client is notified of the assignment by WhatsApp.</li>
 </ul>
 
 <div class="callout warn">
@@ -1434,15 +1459,21 @@ td strong { font-weight: 700; }
   <p>The Squarespace form is submitted before payment. Zapier needs to connect the Stripe payment to the correct form submission. The recommended approach: when the client submits the form, Zapier stores the form data temporarily in Airtable as a "pending" record (no Case ID yet). When the Stripe payment fires, Zapier matches by client email and upgrades the pending record to a full case record. Full setup is covered in Annex E.</p>
 </div>
 
-<h2>Workflow 2 — Status Change → Client Notification</h2>
-<p class="lv"><strong>Trigger:</strong> Airtable record updated (Status field change detected)</p>
+<h2>Workflow 2 — Case Page Updated → Client Notification</h2>
+<p class="lv"><strong>Trigger:</strong> Airtable record updated (Page Ready checkbox checked)</p>
 <ul>
-  <li>Filter: only continue if Status has changed.</li>
-  <li>Path A — Status = "In Review": WhatsApp to client: "Your case is being reviewed and prepared by [Office Name]."</li>
-  <li>Path B — Status = "Booked": WhatsApp to client with confirmed appointment date, time, and notary office address.</li>
-  <li>Path C — Status = "Completed": WhatsApp to client with Google Drive document download links.</li>
-  <li>Each path also sends a fallback email with the same content.</li>
+  <li>Filter: only continue if Page Ready = checked.</li>
+  <li>Read the current Status field to determine which message to send.</li>
+  <li>Path A — Status = "In Review": WhatsApp to client: "Your case is being reviewed and prepared by [Office Name]." + case page link. Fallback email.</li>
+  <li>Path B — Status = "Booked": WhatsApp to client with confirmed appointment date, time, and notary office address + case page link. Fallback email.</li>
+  <li>Path C — Status = "Completed": WhatsApp to client with Google Drive document download links. Fallback email.</li>
+  <li>After firing: reset Page Ready to unchecked, ready for the next status change.</li>
 </ul>
+
+<div class="callout">
+  <p class="c-title">Why Page Ready gates the WhatsApp</p>
+  <p>The client case page is static — it does not update automatically when the notary changes status. The admin updates it manually. Sending the WhatsApp before the page is updated would mean the client lands on a stale page. The Page Ready checkbox is the admin's confirmation that the page reflects the current state. Only then does Zapier fire the message.</p>
+</div>
 
 <h2>Workflow 3 — Booking Confirmation</h2>
 <p class="lv"><strong>Trigger:</strong> Airtable record updated (Booking Date field updated)</p>
@@ -1685,8 +1716,8 @@ td strong { font-weight: 700; }
   <div class="three-box-item">
     <div class="three-box-num">3</div>
     <div class="three-box-content">
-      <strong>The automation is the product.</strong>
-      <p>The right WhatsApp message at the right moment, sent automatically. That is what clients experience as quality and care. It requires no human. It never misses.</p>
+      <strong>Automation is the backbone.</strong>
+      <p>The right WhatsApp message at the right moment, sent on cue. That is what clients experience as quality and care. The admin controls the timing. The system ensures nothing falls through the cracks.</p>
     </div>
   </div>
 </div>
@@ -1749,6 +1780,7 @@ td strong { font-weight: 700; }
     <tr><td>Payment Date</td><td>Date</td><td>Populated by Zapier when payment confirmed.</td></tr>
     <tr><td>Internal Notes</td><td>Long text</td><td>Notary and admin use only. Never visible to clients.</td></tr>
     <tr><td>Consent Recorded</td><td>Checkbox</td><td>Checked by Zapier on case creation.</td></tr>
+    <tr><td>Page Ready</td><td>Checkbox</td><td>Checked by admin once the client case page is updated for the current status. Zapier watches this to trigger the client WhatsApp. Reset to unchecked after each notification fires.</td></tr>
   </tbody>
 </table>
 
@@ -1756,7 +1788,7 @@ td strong { font-weight: 700; }
 <ol>
   <li>Click "+" next to the Cases tab to add a new table.</li>
   <li>Name it: <strong>Notary Offices</strong>.</li>
-  <li>Add fields: Office Name (text), Contact Email (email), Contact Phone (phone), City (text), Subscription Status (single select: Trial/Active/Inactive), Monthly Fee (currency EUR), Assigned Cases (linked to Cases), Squarespace Login Email (email), Airtable View Link (URL), Onboarding Date (date), Internal Notes (long text).</li>
+  <li>Add fields: Office Name (text), Contact Email (email), Contact Phone (phone), City (text), Cities Served (multiple select — add each city where this office accepts cases), Subscription Status (single select: Trial/Active/Inactive), Monthly Fee (currency EUR), Assigned Cases (linked to Cases), Squarespace Login Email (email), Airtable View Link (URL), Onboarding Date (date), Internal Notes (long text).</li>
 </ol>
 
 <h2>A4. Create Filtered Views for Notary Offices</h2>
@@ -1917,17 +1949,19 @@ td strong { font-weight: 700; }
 
 <h2>Workflow 2 — Status Change → Client Notification</h2>
 <h4>Trigger</h4>
-<p>App: Airtable → Updated Record → Table: Cases → Watch field: Status.</p>
+<p>App: Airtable → Updated Record → Table: Cases → Watch field: Page Ready.</p>
 <h4>Actions</h4>
 <ol>
-  <li>Filter by Zapier: only continue if Status has changed.</li>
+  <li>Filter by Zapier: only continue if Page Ready = checked.</li>
+  <li>Read the Status field to determine which path to take.</li>
   <li>Paths by Zapier — three branches:
     <ul>
-      <li><strong>Path A (In Review):</strong> WhatsApp + email: "Your case is being reviewed and prepared by [Office Name]."</li>
-      <li><strong>Path B (Booked):</strong> WhatsApp + email: "Your appointment is confirmed: [Date], [Time], [Address]."</li>
+      <li><strong>Path A (In Review):</strong> WhatsApp + email: "Your case is being reviewed and prepared by [Office Name]." + case page link.</li>
+      <li><strong>Path B (Booked):</strong> WhatsApp + email: "Your appointment is confirmed: [Date], [Time], [Address]." + case page link.</li>
       <li><strong>Path C (Completed):</strong> WhatsApp + email: "Your case is complete. Download your documents: [link]"</li>
     </ul>
   </li>
+  <li>App: Airtable → Update Record → set Page Ready = unchecked. Ready for the next status change.</li>
 </ol>
 
 <h2>Workflow 3 — Booking Confirmation</h2>
@@ -2027,10 +2061,11 @@ td strong { font-weight: 700; }
 
 <h2>Per case</h2>
 <ul>
-  <li><strong>New case opened:</strong> Verify Zapier ran correctly (Airtable record created, WhatsApp sent, Google Drive folders created). Create the client case page in Squarespace if Workflow 6 is not yet active (Annex D3).</li>
-  <li><strong>Case assigned to notary:</strong> Grant Google Drive folder access to the notary office (Annex B3).</li>
-  <li><strong>Notary confirms appointment:</strong> Update Booking Date and Booking Time in Airtable. Zapier sends client confirmation automatically.</li>
-  <li><strong>Case completed:</strong> Update client case page to Completed state with document download links.</li>
+  <li><strong>New case opened:</strong> Verify Zapier ran correctly (Airtable record created, WhatsApp sent, Google Drive folders created). Create the client case page in Squarespace (Annex D3). Confirm or assign the notary office — if the client stated a preference, honour it; if unavailable, contact the client by WhatsApp before reassigning. Send client the case page link once the page is published.</li>
+  <li><strong>Case assigned to notary:</strong> Grant Google Drive folder access to the notary office (Annex B3). Send WhatsApp to client confirming the assigned office name.</li>
+  <li><strong>Status changes (any):</strong> Update the client case page to reflect the new status, appointment details, or download links. Once updated, check the "Page Ready" field in Airtable. Zapier watches this and fires the client WhatsApp automatically. Reset Page Ready to unchecked after the message fires.</li>
+  <li><strong>Notary confirms appointment:</strong> Update Booking Date and Booking Time in Airtable. Update case page with appointment details. Check Page Ready. Zapier sends client confirmation.</li>
+  <li><strong>Case completed:</strong> Update client case page with download links. Check Page Ready. Client receives WhatsApp with download link.</li>
 </ul>
 
 <h2>Monthly</h2>
